@@ -1,30 +1,34 @@
 "use client";
 import { NextPage } from "next";
 import styles from '../styles/homePageLayout.module.css';
-import { useState } from "react";
-import { Button } from "@mui/material";
+import { useEffect, useState } from "react";
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeMuteIcon from '@mui/icons-material/VolumeMute';
-import testYahooService from "./api/yahoo/testYahooService";
+import { Button, Snackbar } from '@mui/material';
+import LoginButton from "../components/homapage/LoginButton";
 
 const HomePage: NextPage = () => {
-
+  
+  const [open, setOpen] = useState(false);
   const [isMute, setIsMute] = useState<boolean>(false);
-
-
 
   const muteSound = () => {
     setIsMute(false);
   }
 
-  const runTestYahooService = async () => {
-    try {
-      const result = await testYahooService();
-      console.log(result);
-    } catch (error) {
-      console.error("Error running handler:", error);
+  const handleSnackBarClick = () => {
+    setOpen(true);
+  };
+  const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
     }
-  }
+    setOpen(false);
+  };
+
+  useEffect(() => {
+    document.cookie = 'accessToken=; Max-Age=0; path=/;';
+  })
 
 
   return (
@@ -38,7 +42,7 @@ const HomePage: NextPage = () => {
             <Button onClick={muteSound}><VolumeUpIcon /></Button>
           )
           }
-          <Button onClick={runTestYahooService}>Run API Test</Button>
+         <LoginButton />
         </div>
       </main>
     </>
