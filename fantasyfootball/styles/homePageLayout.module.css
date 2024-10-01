@@ -47,3 +47,57 @@
       transform: rotate(360deg);
     }
   }
+
+  .title {
+    flex-grow: 1; /* Allow title to take up space */
+    color: white;
+  }
+
+  .bigtitle {
+    flex-grow: 1; /* Allow title to take up space */
+    color: white;
+    padding-top: 20px;
+  }
+  
+  .featureButton {
+    margin-left: 10px; /* Add space between buttons */
+  }
+/* homePageLayout.module.css */
+
+.title {
+  flex-grow: 1; /* Allow title to take up space */
+  color: white; /* Change this if the text is not visible */
+}
+
+.featureButton {
+  margin-left: 10px; /* Space between buttons */
+}
+
+.appBar {
+    z-index: 1200; /* Ensure it's higher than the backdrop */
+    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background for better contrast */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Add a shadow for depth */
+}
+
+.App {
+    position: relative;
+    z-index: 1; /* Ensure content is above backdrop */
+}
+
+/* Backdrop styles */
+.backdrop {
+    position: absolute; /* Or fixed if needed */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0; /* Make sure this is lower than the app bar */
+    background-image: url('/path/to/your/image.jpg');
+    background-size: cover; /* Adjust based on your needs */
+    background-position: center;
+}
+
+
+
+
+  
