@@ -1,7 +1,7 @@
 "use client";
 import { NextPage } from "next";
 import styles from '../styles/homePageLayout.module.css';
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeMuteIcon from '@mui/icons-material/VolumeMute';
 import { Button, Snackbar } from '@mui/material';
@@ -30,7 +30,9 @@ const HomePage: NextPage = () => {
     document.cookie = 'accessToken=; Max-Age=0; path=/;';
   })
 
-
+  useEffect(() => {
+    console.log(process.env.YAHOO_REDIRECT_URI);
+  }, []);
   return (
     <>
       <main>
