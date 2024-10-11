@@ -5,22 +5,13 @@ import axios from 'axios';
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get('code');
-  // Retrieve the codeVerifier cookie as a RequestCookie object
-  const codeVerifierCookie = request.cookies.get('codeVerifier');
 
   // Check if the code was provided
   if (!code) {
+    console.error('No code provided in request');
     return NextResponse.json({ error: 'No code provided' }, { status: 400 });
   }
-
-  // Check if codeVerifier cookie exists and extract its value
-  if (!codeVerifierCookie || !codeVerifierCookie.value) {
-    return NextResponse.json({ error: 'No code verifier provided' }, { status: 400 });
-  }
-
-  // Get the actual string value of codeVerifier
-  const codeVerifier = codeVerifierCookie.value; // Now this is the string
-
+  
   try {
     // Exchange authorization code for access token
     const tokenResponse = await axios.post(
@@ -29,9 +20,8 @@ export async function GET(request: NextRequest) {
         client_id: process.env.YAHOO_CLIENT_ID!,
         client_secret: process.env.YAHOO_CLIENT_SECRET!,
         redirect_uri: process.env.YAHOO_REDIRECT_URI!,
-        code,
+        code: code,
         grant_type: 'authorization_code',
-        code_verifier: codeVerifier, // Use the stored code verifier
       }),
       {
         headers: {
@@ -39,11 +29,12 @@ export async function GET(request: NextRequest) {
         },
       }
     );
-    console.log(tokenResponse.data);
+    
+    console.log('Token Response:', tokenResponse.data); // Log the successful response
     const { access_token, refresh_token } = tokenResponse.data;
-
+    
     // Set cookies
-    const response = NextResponse.json({ success: true }); // Create a response object
+    const response = NextResponse.json({ success: true });
     response.cookies.set('accessToken', access_token, {
       httpOnly: true,
       maxAge: 60 * 60, // 1 hour
@@ -55,13 +46,26 @@ export async function GET(request: NextRequest) {
       path: '/',
     });
 
-    // Redirect user after setting cookies
-    response.headers.set('Location', '/home'); // Set the location header
-    response.status = 302; // Set status to 302 for redirection
+    // Redirect user to '/home' page
+    const redirectUrl = new URL('/home', request.nextUrl.origin);
 
-    return response;
+    return NextResponse.redirect(redirectUrl);
   } catch (error) {
-    console.error('Failed to exchange code for access token:', error);
+    if (axios.isAxiosError(error)) {
+      // Detailed Axios error logging
+      console.error('Axios error occurred:', {
+        message: error.message,
+        code: error.code,
+        config: error.config,
+        responseData: error.response?.data, // Log the response from Yahoo if available
+        responseStatus: error.response?.status, // HTTP status code from the response
+      });
+    } else {
+      // General error logging
+      console.error('An unexpected error occurred:', error);
+    }
+
+    // Return a more specific error message
     return NextResponse.json({ error: 'Failed to exchange code for token' }, { status: 500 });
   }
 }

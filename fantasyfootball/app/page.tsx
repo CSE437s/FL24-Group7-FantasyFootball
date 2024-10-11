@@ -25,14 +25,7 @@ const HomePage: NextPage = () => {
     }
     setOpen(false);
   };
-
-  useEffect(() => {
-    document.cookie = 'accessToken=; Max-Age=0; path=/;';
-  })
-
-  useEffect(() => {
-    console.log(process.env.YAHOO_REDIRECT_URI);
-  }, []);
+  
   return (
     <>
       <main>

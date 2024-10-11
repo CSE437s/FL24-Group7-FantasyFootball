@@ -7,7 +7,9 @@ const LoginButton: React.FC = () => {
 
   const handleLogin = () => {
     // Redirect to Yahoo login URL
-    window.location.href = '/api/yahoo-oauth-initiate';
+    window.location.href = yahooURL;
+
+    // window.location.href = '/api/yahoo-oauth-initiate';
   };
 
   return (
