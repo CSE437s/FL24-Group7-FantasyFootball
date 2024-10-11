@@ -1,0 +1,82 @@
+.App {
+    background-color: #800080; /* Purple background color */
+    min-height: 100vh; /* Ensure the background covers the full height */
+    display: flex; /* Allows for flexible positioning of inner content */
+    flex-direction: column; /* Arranges children in a column */
+    align-items: center; /* Center content horizontally */
+    color: white; /* Change text color to white for contrast */
+    position: relative; /* Make it relative for absolute positioning of child elements */
+}
+
+.title {
+    font-size: 2.5rem; /* Larger title size */
+    margin-bottom: 0.5rem; /* Reduce space below the title */
+    position: absolute; /* Position the title at the top */
+    top: 20px; /* Distance from the top */
+    left: 50%; /* Center horizontally */
+    transform: translateX(-50%); /* Adjust horizontal center */
+}
+
+.leagueteam {
+    margin-top: 150px; /* Reduce space above the league/team name */
+    font-size: 1.5rem; /* Adjust font size if needed */
+    color: white; /* Ensure it's visible */
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center; /* Center the text */
+    margin-top: 25px; /* Bring content higher by adjusting this value */
+}
+
+.teamContainer {
+    display: flex;
+    justify-content: space-between; /* Space between teams */
+    width: 85%; /* Increase this to make it wider */
+    margin-top: 20px; /* Add margin above teams */
+}
+
+.userTeam,
+.opposingTeam {
+    width: 45%; /* Width of each team section */
+}
+
+.playerTable {
+    width: 100%; /* Full width of table */
+    border-collapse: collapse; /* Collapse borders for a cleaner look */
+    table-layout: fixed; /* Fix column widths */
+}
+
+.playerTable th,
+.playerTable td {
+    padding: 10px; /* Add padding for better spacing */
+    text-align: left; /* Align text to the left */
+}
+
+.analysis {
+    margin-top: 30px; /* Space between teams and analysis */
+    padding: 15px; /* Padding around analysis section */
+    background-color: rgba(255, 255, 255, 0.1); /* Lightly shaded background */
+    border-radius: 8px; /* Rounded corners */
+    width: 90%; /* Optional: Make analysis section wider as well */
+}
+.homeButton {
+    position: absolute; /* Position the button at the top right */
+    top: 20px; /* Distance from the top */
+    right: 20px; /* Distance from the right */
+    padding: 0.75rem 1.5rem; /* Button padding */
+    font-size: 1rem; /* Button text size */
+    color: #fff; /* White text color */
+    background-color: #0070f3; /* Primary button color */
+    border: none; /* No border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s; /* Transition for hover effect */
+  }
+  
+  .homeButton:hover {
+    background-color: #005bb5; /* Darker shade on hover */
+  }

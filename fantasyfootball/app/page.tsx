@@ -34,9 +34,9 @@ const HomePage: NextPage = () => {
               Waiver Wire Suggestions
             </Button>
           </Link>
-          <Link href="/trade-analyzer" passHref>
+          <Link href="/team-analyzer" passHref>
             <Button variant="contained" color="secondary" className={styles.featureButton}>
-              Trade Analyzer
+              Team Analyzer
             </Button>
           </Link>
           <Link href="/trade-builder" passHref>

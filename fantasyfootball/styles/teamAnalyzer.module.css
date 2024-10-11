@@ -1,0 +1,82 @@
+.App {
+    background: linear-gradient(135deg, #800080, #4b0082); /* Gradient background */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: white;
+    padding: 20px;
+    position: relative;
+  }
+  
+  .content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 100px; /* Space between title and content */
+    text-align: center; /* Center the text */
+    width: 100%; /* Allow content to take full width */
+  }
+  
+  .playerTable {
+    width: 90%; /* Increase table width */
+    border-collapse: collapse; /* Collapse borders for a cleaner look */
+    margin: 0 auto; /* Center the table */
+  }
+  
+  .playerTable th, .playerTable td {
+    padding: 15px; /* Add padding for better spacing */
+    text-align: left; /* Align text to the left */
+  }
+  
+  .playerTable th {
+    background-color: rgba(255, 255, 255, 0.2); /* Lightly shaded header */
+    color: white; /* White text for the header */
+  }
+  
+  .playerTable tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.1); /* Lightly shaded even rows */
+  }
+  
+  .playerTable tr:nth-child(odd) {
+    background-color: rgba(255, 255, 255, 0.2); /* Lightly shaded odd rows */
+  }
+  
+  .playerTable tr:hover {
+    background-color: rgba(255, 255, 255, 0.3); /* Highlight rows on hover */
+  }
+  
+  .title {
+    font-size: 2.5rem; /* Larger title size */
+    margin-bottom: 1.5rem; /* Increase space below the title */
+    position: absolute; /* Position the title at the top */
+    top: 20px; /* Distance from the top */
+    left: 50%; /* Center horizontally */
+    transform: translateX(-50%); /* Adjust horizontal center */
+  }
+  
+  .leagueteam {
+    margin-top: 100px; /* Add space above the league/team name */
+    font-size: 1.5rem; /* Adjust font size if needed */
+    color: white; /* Ensure it's visible */
+  }
+  
+  .homeButton {
+    position: absolute; /* Position the button at the top right */
+    top: 20px; /* Distance from the top */
+    right: 20px; /* Distance from the right */
+    padding: 0.75rem 1.5rem; /* Button padding */
+    font-size: 1rem; /* Button text size */
+    color: #fff; /* White text color */
+    background-color: #0070f3; /* Primary button color */
+    border: none; /* No border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s; /* Transition for hover effect */
+  }
+  
+  .homeButton:hover {
+    background-color: #005bb5; /* Darker shade on hover */
+  }
+  
