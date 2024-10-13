@@ -1,5 +1,4 @@
-declare module 'yahoo-fantasy/dist/YahooFantasy.mjs' {
-    const YahooFantasy: any;
-    export default YahooFantasy;
-  }
-  
+declare module 'yahoo-fantasy' {
+  const YahooFantasy: any;
+  export default YahooFantasy;
+}

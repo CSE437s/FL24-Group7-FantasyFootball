@@ -1,11 +1,10 @@
-// src/app/home/page.tsx
 'use client';
 import { useEffect, useState } from 'react';
-import YahooFantasy from 'yahoo-fantasy/dist/YahooFantasy.mjs';
-
+import { YahooFantasy as YahooFantasyWrapper } from '../../lib/yahoo-fantasy-wrapper';
+import SignOutButton from '../../components/homapage/SignOutButton';
 interface Cookies {
-accessToken: string;
-refreshToken: string;
+  accessToken: string;
+  refreshToken: string;
 }
 
 const HomePage: React.FC = () => {
@@ -16,30 +15,28 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     const fetchUserData = async () => {
+      try {
+        const res = await fetch('/api/get-cookies');
+        const data = await res.json();
+        setData(data as Cookies);
 
-      fetch('/api/get-cookies')
-        .then(res => res.json())
-        .then(data => {
-          setData(data as Cookies);
-        })
-        .catch(err => console.error(err));
-      
-      const yf = new YahooFantasy(
-        process.env.YAHOO_CLIENT_ID, // Yahoo! Application Key
-        process.env.YAHOO_CLIENT_SECRET, // Yahoo! Application Secret
-      );
+        const YahooFantasy = await YahooFantasyWrapper();
+        const yf = new YahooFantasy(
+          process.env.YAHOO_CLIENT_ID!,
+          process.env.YAHOO_CLIENT_SECRET!
+        );
 
-      yf.setUserToken(
-        data?.accessToken
-      );
-
-      yf.setRefreshToken(
-        data?.refreshToken
-      );
-      
+        yf.setUserToken(data.accessToken);
+        yf.setRefreshToken(data.refreshToken);
 
 
-      setLoading(false);
+        // Using the API fetch Data here ------
+        setLoading(false);
+      } catch (err) {
+        console.error(err);
+        setError('Failed to load user data.');
+        setLoading(false);
+      }
     };
 
     fetchUserData();
@@ -51,6 +48,8 @@ const HomePage: React.FC = () => {
     <div>
       <h1>User Data</h1>
       <pre>{JSON.stringify(userData, null, 2)}</pre>
+      {error && <p>Error: {error}</p>}
+      <SignOutButton />
     </div>
   );
 };

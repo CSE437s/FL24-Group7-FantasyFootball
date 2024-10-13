@@ -1,5 +1,5 @@
+// lib/yahoo-fantasy-wrapper.ts
 export const YahooFantasy = async () => {
-    const module = await import('yahoo-fantasy/dist/YahooFantasy.mjs');
-    return module.default;
-  };
-  
+  const module = await import('yahoo-fantasy');
+  return module?.default || module;
+};

@@ -30,26 +30,24 @@ export async function GET(request: NextRequest) {
       }
     );
     
-    console.log('Token Response:', tokenResponse.data); // Log the successful response
     const { access_token, refresh_token } = tokenResponse.data;
     
-    // Set cookies
-    const response = NextResponse.json({ success: true });
-    response.cookies.set('accessToken', access_token, {
-      httpOnly: true,
-      maxAge: 60 * 60, // 1 hour
-      path: '/',
-    });
-    response.cookies.set('refreshToken', refresh_token, {
-      httpOnly: true,
-      maxAge: 60 * 60 * 24 * 30, // 30 days
-      path: '/',
-    });
+     const response = NextResponse.redirect(new URL('/home', request.nextUrl.origin));
 
-    // Redirect user to '/home' page
-    const redirectUrl = new URL('/home', request.nextUrl.origin);
-
-    return NextResponse.redirect(redirectUrl);
+     // Set cookies for access and refresh tokens
+     response.cookies.set('accessToken', access_token, {
+       httpOnly: true,
+       maxAge: 60 * 60, // 1 hour
+       path: '/',
+     });
+ 
+     response.cookies.set('refreshToken', refresh_token, {
+       httpOnly: true,
+       maxAge: 60 * 60 * 24 * 30, // 30 days
+       path: '/',
+     });
+  
+     return response;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       // Detailed Axios error logging
