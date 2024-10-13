@@ -103,3 +103,31 @@ const TradeBuilderPage: NextPage = () => {
 };
 
 export default TradeBuilderPage;
+
+/*
+Notes for trade builder:
+Thinking maybe offer three insights per waiver wire player
+--> (1): boom/bust --> will the trade make your team more consistent, or volatile?
+--> (2): future defenses --> how are players future matchups after trading for them?
+--> (3): depth analysis --> will the trade help/harm overall team depth
+
+Boom/Bust Analysis:
+
+Add a boom/bust score for both outgoing and incoming players. Calculate this using standard deviation of fantasy points over recent games.
+Provide an overall volatility score for the trade, showing whether the trade increases or decreases the likelihood of consistent performance.
+Future Matchup Analysis:
+
+Fetch the upcoming opponents for the players involved in the trade and provide a projected difficulty rating. You can compare how the players are expected to perform based on their opponent's defensive rankings (e.g., how many fantasy points the defense typically allows to certain positions).
+Display a list of the next 3-5 matchups and highlight favorable or unfavorable matchups in green/red.
+Depth Analysis:
+
+Analyze the depth of the user’s team both before and after the trade. Check if the trade leaves the user too stacked in one position but thin in others.
+Offer recommendations based on roster needs (e.g., "Your team is deep in WRs but lacks RB depth. This trade improves RB depth but weakens WR depth.").
+Additionally, to enhance the Trade Score:
+
+Incorporate player rankings and projections into the score. A higher-ranked player or a player with better future matchups should increase the trade score.
+Factor in positional needs. Trades that better balance the user’s roster should result in a higher score.
+
+
+
+*/

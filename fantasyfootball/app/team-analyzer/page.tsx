@@ -19,7 +19,7 @@ const players: Player[] = [
   { position: "TE", name: "Darren Waller", team: "NYG", analysis: "Great option in red zone." }
 ];
 
-const WaiverWirePage: NextPage = () => {
+const TeamAnalyzerPage: NextPage = () => {
   return (
     <div className={styles.App}>
       <h1 className={styles.title}>Team Analyzer</h1>
@@ -53,5 +53,30 @@ const WaiverWirePage: NextPage = () => {
   );
 };
 
-export default WaiverWirePage;
+export default TeamAnalyzerPage;
+
+/*
+Notes for Team Analyzer:
+Thinking maybe offer three insights per waiver wire player
+--> (1): strengths and weaknesses by position
+--> (2): top place for improvement (and suggestions to achieve)
+
+For your Team Analyzer page, here are a few suggestions to enhance the insights you want to offer:
+
+Strengths and Weaknesses by Position:
+
+Analyze each position (QB, RB, WR, etc.) on the user’s team by comparing their players to the league averages or median scores for that position.
+Provide a positional rating (on a scale or percentile) to show how the user’s roster stacks up in each category.
+You could use color coding (green for strong, yellow for average, red for weak) to highlight each position's status at a glance.
+Top Place for Improvement:
+
+Identify the weakest position based on current performance, projected future matchups, or player injury risk.
+Suggest waiver wire or trade options to improve the weakest position, with detailed recommendations such as potential free agents or trade targets.
+Additional features:
+
+Bench Depth Analysis: Analyze bench players and determine if any underperforming or injury-prone players should be dropped or replaced with better options.
+Bye Week Gaps: Highlight any bye week gaps, where multiple key players are out in the same week, and suggest planning moves to mitigate that.
+Injury Risk Alerts: Include a health check, flagging injury risks or currently injured players and suggesting suitable replacements.
+
+*/
 
