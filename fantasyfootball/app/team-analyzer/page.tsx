@@ -1,25 +1,111 @@
+'use client';
 import { NextPage } from "next";
 import Link from "next/link";
 import styles from '../../styles/teamAnalyzer.module.css';
+import { useEffect, useState } from "react";
 
 interface Player {
-  position: string;
-  name: string;
-  team: string;
-  analysis: string;
+  player: string; // Player name
+  pos: string;    // Player position
+  posrank: number; // Player position rank
+  week1_points: number; 
+  week2_points: number; 
+  week3_points: number; 
+  week4_points: number; 
+  week5_points: number; 
+  week6_points: number;
 }
 
-const players: Player[] = [
-  { position: "QB", name: "Kirk Cousins", team: "ATL", analysis: "Solid starter, good matchup upcoming." },
-  { position: "QB", name: "Jalen Hurts", team: "PHI", analysis: "Dual-threat quarterback with high fantasy upside." },
-  { position: "RB", name: "Jonathan Taylor", team: "IND", analysis: "High potential for breakout games." },
-  { position: "RB", name: "James Conner", team: "ARI", analysis: "Heavy workload expected, risk of injury." },
-  { position: "WR", name: "A.J. Brown", team: "PHI", analysis: "Consistent performer, strong target share." },
-  { position: "WR", name: "Tee Higgins", team: "CIN", analysis: "Strong WR2 option with big-play ability." },
-  { position: "TE", name: "Darren Waller", team: "NYG", analysis: "Great option in red zone." }
-];
+
+
+const analyzePlayer = (player: Player) => {
+  if (player.pos === 'QB' || player.pos === 'TE') {
+    if (player.posrank === 1) {
+      return 'A+: best at position!';
+    } else if (player.posrank >= 2 && player.posrank <= 5) {
+      return 'A:';
+    } else if (player.posrank > 5 && player.posrank <= 10) {
+      return 'B';
+    } else if (player.posrank > 10 && player.posrank <= 15) {
+      return 'C';
+    } else if (player.posrank > 15 && player.posrank <= 20) {
+      return 'D';
+    } else {
+      return 'F';
+    }
+  } else if (player.pos === 'WR' || player.pos === 'RB') {
+    if (player.posrank === 1) {
+      return 'A+';
+    } else if (player.posrank > 2 && player.posrank <= 5) {
+      return 'A';
+    } else if (player.posrank > 5 && player.posrank <= 10) {
+      return 'B';
+    } else if (player.posrank > 10 && player.posrank <= 15) {
+      return 'C';
+    } else if (player.posrank > 15 && player.posrank <= 20) {
+      return 'D';
+    } else {
+      return 'F';
+    }
+  }
+  return 'N/A';
+};
+
+const calculateConsistency = (player: Player): [string, number | null] => {
+  const weeklyPoints = [
+    player.week1_points,
+    player.week2_points,
+    player.week3_points,
+    player.week4_points,
+    player.week5_points,
+    player.week6_points,
+  ];
+
+  const totalPoints = weeklyPoints.reduce((acc, points) => acc + points, 0);
+  
+  // If total points are less than 40, return "N/A" and null for stdDev
+  if (totalPoints < 40) {
+    return ["N/A", null];
+  }
+
+  // Calculate standard deviation for consistency
+  const mean = totalPoints / weeklyPoints.length;
+  const variance =
+    weeklyPoints.reduce((acc, points) => acc + Math.pow(points - mean, 2), 0) /
+    weeklyPoints.length;
+
+  const stdDev = Math.sqrt(variance);
+  return [totalPoints.toString(), stdDev]; // Convert totalPoints to string for rendering
+};
+
+
 
 const TeamAnalyzerPage: NextPage = () => {
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPlayers = async () => {
+      try {
+        const response = await fetch('/api/players'); // Fetch from the API route
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json(); // Parse the JSON
+        setPlayers(data); // Update state with fetched players
+        console.log(data); // Log the fetched data for debugging
+      } catch (err) {
+        setError('Failed to load players data');
+      }
+    };
+
+    fetchPlayers(); // Call the function to fetch players
+  }, []);
+
+  if (error) {
+    return <div className={styles.error}>{error}</div>; // Display error message if there's an error
+  }
+
   return (
     <div className={styles.App}>
       <h1 className={styles.title}>Team Analyzer</h1>
@@ -28,32 +114,36 @@ const TeamAnalyzerPage: NextPage = () => {
         <button className={styles.homeButton}>Back to Homepage</button>
       </Link>
       <div className={styles.content}>
-        <table className={styles.playerTable}>
-          <thead>
-            <tr>
-              <th>Position</th>
-              <th>Name</th>
-              <th>Team</th>
-              <th>Analysis</th>
-            </tr>
-          </thead>
-          <tbody>
-            {players.map((player, index) => (
-              <tr key={index}>
-                <td>{player.position}</td>
-                <td>{player.name}</td>
-                <td>{player.team}</td>
-                <td>{player.analysis}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+  <table className={styles.playerTable}>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Position</th>
+        <th>Analysis</th> {/* New column for PosRank */}
+        <th>Consistency Rating</th> {/* New column for PosRank */}
+      </tr>
+    </thead>
+    <tbody>
+  {players.map((player, index) => {
+
+    return (
+      <tr key={index}>
+        <td className={styles.td}>{player.player}</td>
+        <td className={styles.td}>{player.pos}</td> {/* Will show "N/A" if under 40 */}
+        <td className={styles.td}>{analyzePlayer(player)}</td> {/* Player rating */}
+        <td className={styles.td}>{calculateConsistency(player)}</td> {/* You can implement this based on stdDev */}
+      </tr>
+    );
+  })}
+</tbody>
+  </table>
+</div>
     </div>
   );
 };
 
 export default TeamAnalyzerPage;
+
 
 /*
 Notes for Team Analyzer:
@@ -77,6 +167,7 @@ Additional features:
 Bench Depth Analysis: Analyze bench players and determine if any underperforming or injury-prone players should be dropped or replaced with better options.
 Bye Week Gaps: Highlight any bye week gaps, where multiple key players are out in the same week, and suggest planning moves to mitigate that.
 Injury Risk Alerts: Include a health check, flagging injury risks or currently injured players and suggesting suitable replacements.
+
 
 */
 
