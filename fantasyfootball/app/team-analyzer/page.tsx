@@ -5,9 +5,9 @@ import styles from '../../styles/teamAnalyzer.module.css';
 import { useEffect, useState } from "react";
 
 interface Player {
-  player: string; // Player name
-  pos: string;    // Player position
-  posrank: number; // Player position rank
+  Player: string; // Player name
+  Pos: string;    // Player Position
+  Rankbypos: number; // Player Position rank
   week1_points: number; 
   week2_points: number; 
   week3_points: number; 
@@ -18,31 +18,31 @@ interface Player {
 
 
 
-const analyzePlayer = (player: Player) => {
-  if (player.pos === 'QB' || player.pos === 'TE') {
-    if (player.posrank === 1) {
-      return 'A+: best at position!';
-    } else if (player.posrank >= 2 && player.posrank <= 5) {
+const analyzePlayer = (Player: Player) => {
+  if (Player.Pos === 'QB' || Player.Pos === 'TE') {
+    if (Player.Rankbypos === 1) {
+      return 'A+: best at Position!';
+    } else if (Player.Rankbypos >= 2 && Player.Rankbypos <= 5) {
       return 'A:';
-    } else if (player.posrank > 5 && player.posrank <= 10) {
+    } else if (Player.Rankbypos > 5 && Player.Rankbypos <= 10) {
       return 'B';
-    } else if (player.posrank > 10 && player.posrank <= 15) {
+    } else if (Player.Rankbypos > 10 && Player.Rankbypos <= 15) {
       return 'C';
-    } else if (player.posrank > 15 && player.posrank <= 20) {
+    } else if (Player.Rankbypos > 15 && Player.Rankbypos <= 20) {
       return 'D';
     } else {
       return 'F';
     }
-  } else if (player.pos === 'WR' || player.pos === 'RB') {
-    if (player.posrank === 1) {
+  } else if (Player.Pos === 'WR' || Player.Pos === 'RB') {
+    if (Player.Rankbypos === 1) {
       return 'A+';
-    } else if (player.posrank > 2 && player.posrank <= 5) {
+    } else if (Player.Rankbypos > 2 && Player.Rankbypos <= 5) {
       return 'A';
-    } else if (player.posrank > 5 && player.posrank <= 10) {
+    } else if (Player.Rankbypos > 5 && Player.Rankbypos <= 10) {
       return 'B';
-    } else if (player.posrank > 10 && player.posrank <= 15) {
+    } else if (Player.Rankbypos > 10 && Player.Rankbypos <= 15) {
       return 'C';
-    } else if (player.posrank > 15 && player.posrank <= 20) {
+    } else if (Player.Rankbypos > 15 && Player.Rankbypos <= 20) {
       return 'D';
     } else {
       return 'F';
@@ -51,14 +51,14 @@ const analyzePlayer = (player: Player) => {
   return 'N/A';
 };
 
-const calculateConsistency = (player: Player): [string, number | null] => {
+const calculateConsistency = (Player: Player): [string, number | null] => {
   const weeklyPoints = [
-    player.week1_points,
-    player.week2_points,
-    player.week3_points,
-    player.week4_points,
-    player.week5_points,
-    player.week6_points,
+    Player.week1_points,
+    Player.week2_points,
+    Player.week3_points,
+    Player.week4_points,
+    Player.week5_points,
+    Player.week6_points,
   ];
 
   const totalPoints = weeklyPoints.reduce((acc, points) => acc + points, 0);
@@ -81,7 +81,7 @@ const calculateConsistency = (player: Player): [string, number | null] => {
 
 
 const TeamAnalyzerPage: NextPage = () => {
-  const [players, setPlayers] = useState<Player[]>([]);
+  const [Players, setPlayers] = useState<Player[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -91,15 +91,34 @@ const TeamAnalyzerPage: NextPage = () => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
-        const data = await response.json(); // Parse the JSON
-        setPlayers(data); // Update state with fetched players
+        let data = await response.json(); // Parse the JSON
+        
+        data.sort((a: Player, b: Player) => {
+          // First sort by Player name
+
+
+          if (a.Pos < b.Pos) return -1;
+          if (a.Pos > b.Pos) return 1;
+
+
+          if (a.Player < b.Player) return -1;
+          if (a.Player > b.Player) return 1;
+        
+          // If Player names are the same, sort by Pos
+          
+        
+          // If both Player name and Pos are the same, sort by Rankbypos
+          return a.Rankbypos - b.Rankbypos;
+        });
+
+        setPlayers(data); // Update state with fetched Players
         console.log(data); // Log the fetched data for debugging
       } catch (err) {
-        setError('Failed to load players data');
+        setError('Failed to load Players data');
       }
     };
 
-    fetchPlayers(); // Call the function to fetch players
+    fetchPlayers(); // Call the function to fetch Players
   }, []);
 
   if (error) {
@@ -114,24 +133,23 @@ const TeamAnalyzerPage: NextPage = () => {
         <button className={styles.homeButton}>Back to Homepage</button>
       </Link>
       <div className={styles.content}>
-  <table className={styles.playerTable}>
+  <table className={styles.PlayerTable}>
     <thead>
       <tr>
         <th>Name</th>
         <th>Position</th>
-        <th>Analysis</th> {/* New column for PosRank */}
-        <th>Consistency Rating</th> {/* New column for PosRank */}
+        <th>Analysis</th> {/* New column for Rankbypos */}
+        <th>Consistency Rating</th> {/* New column for Rankbypos */}
       </tr>
     </thead>
     <tbody>
-  {players.map((player, index) => {
+  {Players.map((Player, index) => {
 
     return (
       <tr key={index}>
-        <td className={styles.td}>{player.player}</td>
-        <td className={styles.td}>{player.pos}</td> {/* Will show "N/A" if under 40 */}
-        <td className={styles.td}>{analyzePlayer(player)}</td> {/* Player rating */}
-        <td className={styles.td}>{calculateConsistency(player)}</td> {/* You can implement this based on stdDev */}
+        <td className={styles.td}>{Player.Player}</td>
+        <td className={styles.td}>{Player.Pos}</td> {/* Will show "N/A" if under 40 */}
+        <td className={styles.td}>{analyzePlayer(Player)}</td> {/* Player rating */}
       </tr>
     );
   })}
@@ -144,29 +162,31 @@ const TeamAnalyzerPage: NextPage = () => {
 
 export default TeamAnalyzerPage;
 
+// <td className={styles.td}>{calculateConsistency(Player)}</td> {/* You can implement this based on stdDev */}
+
 
 /*
 Notes for Team Analyzer:
-Thinking maybe offer three insights per waiver wire player
---> (1): strengths and weaknesses by position
+Thinking maybe offer three insights per waiver wire Player
+--> (1): strengths and weaknesses by Position
 --> (2): top place for improvement (and suggestions to achieve)
 
 For your Team Analyzer page, here are a few suggestions to enhance the insights you want to offer:
 
 Strengths and Weaknesses by Position:
 
-Analyze each position (QB, RB, WR, etc.) on the user’s team by comparing their players to the league averages or median scores for that position.
-Provide a positional rating (on a scale or percentile) to show how the user’s roster stacks up in each category.
-You could use color coding (green for strong, yellow for average, red for weak) to highlight each position's status at a glance.
+Analyze each Position (QB, RB, WR, etc.) on the user’s team by comparing their Players to the league averages or median scores for that Position.
+Provide a Positional rating (on a scale or percentile) to show how the user’s roster stacks up in each category.
+You could use color coding (green for strong, yellow for average, red for weak) to highlight each Position's status at a glance.
 Top Place for Improvement:
 
-Identify the weakest position based on current performance, projected future matchups, or player injury risk.
-Suggest waiver wire or trade options to improve the weakest position, with detailed recommendations such as potential free agents or trade targets.
+Identify the weakest Position based on current performance, projected future matchups, or Player injury risk.
+Suggest waiver wire or trade options to improve the weakest Position, with detailed recommendations such as potential free agents or trade targets.
 Additional features:
 
-Bench Depth Analysis: Analyze bench players and determine if any underperforming or injury-prone players should be dropped or replaced with better options.
-Bye Week Gaps: Highlight any bye week gaps, where multiple key players are out in the same week, and suggest planning moves to mitigate that.
-Injury Risk Alerts: Include a health check, flagging injury risks or currently injured players and suggesting suitable replacements.
+Bench Depth Analysis: Analyze bench Players and determine if any underperforming or injury-prone Players should be dropped or replaced with better options.
+Bye Week Gaps: Highlight any bye week gaps, where multiple key Players are out in the same week, and suggest planning moves to mitigate that.
+Injury Risk Alerts: Include a health check, flagging injury risks or currently injured Players and suggesting suitable replacements.
 
 
 */
