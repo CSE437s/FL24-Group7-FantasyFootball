@@ -1,51 +1,117 @@
+'use client';
 import { NextPage } from "next";
 import Link from "next/link";
 import styles from '../../styles/waiverWire.module.css';
+import { useEffect, useState } from "react";
 
 interface Player {
-  position: string;
-  name: string;
-  team: string;
-  analysis: string;
+  Player: string; // Player name
+  Pos: string;    // Player Position
+  Rankbypos: number; // Player Position rank
+  WK1Pts: number; 
+  WK2Pts: number; 
+  WK3Pts: number; 
+  WK4Pts: number; 
+  WK5Pts: number; 
+  WK6Pts: number; 
 }
 
-const players: Player[] = [
-  { position: "RB", name: "Jonathan Taylor", team: "IND", analysis: "High potential for breakout games." },
-  { position: "WR", name: "A.J. Brown", team: "PHI", analysis: "Consistent performer, strong target share." },
-  { position: "QB", name: "Jalen Hurts", team: "PHI", analysis: "Dual-threat quarterback with high fantasy upside." },
-  { position: "TE", name: "Darren Waller", team: "NYG", analysis: "Great option in red zone." },
-  { position: "RB", name: "James Conner", team: "ARI", analysis: "Heavy workload expected, risk of injury." },
-  { position: "WR", name: "Tee Higgins", team: "CIN", analysis: "Strong WR2 option with big-play ability." },
-  { position: "QB", name: "Kirk Cousins", team: "ATL", analysis: "Solid starter, good matchup upcoming." },
-];
+const calculateWeekPerformance = (player: Player): string => {
+  const weekPoints = [
+    player.WK1Pts,
+    player.WK2Pts,
+    player.WK3Pts,
+    player.WK4Pts,
+    player.WK5Pts,
+  ];
+  
+  const totalPoints = weekPoints.reduce((acc, points) => acc + points, 0);
+  const averagePoints = totalPoints / weekPoints.length;
+  const difference = player.WK6Pts - averagePoints;
+  const performanceDescriptor = difference > 0 ? "above average" : "below average";
+  
+  return `${difference > 0 ? '+' : ''}${difference.toFixed(2)} pts ${performanceDescriptor}`;
+};
+
+const getStrengthsAndWeaknesses = (player: Player): string => {
+  if (player.WK6Pts > 15) return "Strong performance";
+  if (player.WK6Pts > 10) return "Average performance";
+  return "Weak performance";
+};
 
 const WaiverWirePage: NextPage = () => {
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPlayers = async () => {
+      try {
+        const response = await fetch('/api/players'); // Fetch from the API route
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json(); // Parse the JSON
+        
+        // Filter players based on your criteria
+        const filteredPlayers = data.filter((player: Player) => {
+          const totalPoints = player.WK1Pts + player.WK2Pts + player.WK3Pts + player.WK4Pts + player.WK5Pts + player.WK6Pts;
+          return totalPoints >= 10 && totalPoints < 50;
+        });
+
+        // Sort filtered players by position and name
+        filteredPlayers.sort((a: Player, b: Player) => {
+          const averageA = (a.WK1Pts + a.WK2Pts + a.WK3Pts + a.WK4Pts + a.WK5Pts) / 5;
+          const averageB = (b.WK1Pts + b.WK2Pts + b.WK3Pts + b.WK4Pts + b.WK5Pts) / 5;
+          const diffA = a.WK6Pts - averageA;
+          const diffB = b.WK6Pts - averageB;
+  
+          return diffB - diffA; // Sort by the largest increase (Week 6 vs. average of previous weeks)
+        });
+
+        setPlayers(filteredPlayers); // Update state with fetched players
+        console.log(filteredPlayers); // Log the fetched data for debugging
+      } catch (err) {
+        setError('Failed to load Waiver Wire data: ' + (err as Error).message);
+      }
+    };
+
+    fetchPlayers(); // Call the function to fetch players
+  }, []);
+
+  if (error) {
+    return <div className={styles.error}>{error}</div>; // Display error message if there's an error
+  }
+
   return (
     <div className={styles.App}>
-      <h1 className={styles.title}>Waiver Wire Suggestions Page</h1>
-      <h2 className={styles.leagueteam}>**League Name**: **Team Name**</h2>
+      <h1 className={styles.title}>Waiver Wire Insights</h1>
       <Link href="/" passHref>
         <button className={styles.homeButton}>Back to Homepage</button>
       </Link>
       <div className={styles.content}>
-        <table className={styles.playerTable}>
+        <table className={styles.PlayerTable}>
           <thead>
             <tr>
-              <th>Position</th>
               <th>Name</th>
-              <th>Team</th>
+              <th>Position</th>
+              <th>Week 6 Performance</th>
               <th>Analysis</th>
             </tr>
           </thead>
           <tbody>
-            {players.map((player, index) => (
-              <tr key={index}>
-                <td>{player.position}</td>
-                <td>{player.name}</td>
-                <td>{player.team}</td>
-                <td>{player.analysis}</td>
-              </tr>
-            ))}
+            {players.map((player, index) => {
+              const strengthWeakness = getStrengthsAndWeaknesses(player); // Get strengths and weaknesses
+              const weekPerformance = calculateWeekPerformance(player); // Calculate Week 6 performance
+
+              return (
+                <tr key={index}>
+                  <td className={styles.td}>{player.Player}</td>
+                  <td className={styles.td}>{player.Pos}</td>
+                  <td className={styles.td}>{weekPerformance}</td> {/* Display Week 6 performance */}
+                  <td className={styles.td}>{strengthWeakness}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -54,6 +120,7 @@ const WaiverWirePage: NextPage = () => {
 };
 
 export default WaiverWirePage;
+
 
 /*
 Notes for waiver wire page:

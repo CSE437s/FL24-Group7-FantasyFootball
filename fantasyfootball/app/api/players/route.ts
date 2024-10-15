@@ -11,7 +11,7 @@ const pool = new Pool({
 
 export async function GET() {
   try {
-    const res = await pool.query('SELECT "Player", "Pos", "Rankbypos" FROM "seasonstats"');
+    const res = await pool.query('SELECT "Player", "Pos", "Rankbypos","WK1Pts","WK2Pts","WK3Pts","WK4Pts","WK5Pts","WK6Pts" FROM "seasonstats"');
     return NextResponse.json(res.rows); // Return the player names as JSON
   } catch (err) {
     console.error('Error querying players:', err);

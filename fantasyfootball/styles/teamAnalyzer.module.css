@@ -14,13 +14,13 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin-top: 100px; /* Space between title and content */
+    margin-top: 30px; /* Space between title and content */
     text-align: center; /* Center the text */
     width: 100%; /* Allow content to take full width */
   }
   
   .playerTable {
-    width: 90%; /* Increase table width */
+    width: 100%; /* Increase table width */
     border-collapse: collapse; /* Collapse borders for a cleaner look */
     margin: 0 auto; /* Center the table */
   }

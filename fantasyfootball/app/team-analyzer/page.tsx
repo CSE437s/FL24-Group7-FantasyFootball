@@ -8,27 +8,73 @@ interface Player {
   Player: string; // Player name
   Pos: string;    // Player Position
   Rankbypos: number; // Player Position rank
-  week1_points: number; 
-  week2_points: number; 
-  week3_points: number; 
-  week4_points: number; 
-  week5_points: number; 
-  week6_points: number;
+  WK1Pts: number; 
+  WK2Pts: number; 
+  WK3Pts: number; 
+  WK4Pts: number; 
+  WK5Pts: number; 
+  WK6Pts: number; 
 }
 
+const calculateWeek6Performance = (Player: Player): string => {
+  const weekPoints = [
+    Player.WK1Pts,
+    Player.WK2Pts,
+    Player.WK3Pts,
+    Player.WK4Pts,
+    Player.WK5Pts,
+  ];
+  
+  const averagePoints = weekPoints.reduce((acc, points) => acc + points, 0) / weekPoints.length;
+  const difference = Player.WK6Pts - averagePoints;
+  const performanceDescriptor = difference > 0 ? "above average" : "below average";
+  
+  return `${difference > 0 ? '+' : ''}${difference.toFixed(2)} pts ${performanceDescriptor}`;
+};
 
+const getConsistencyGrade = (stdDev: number | null): string => {
+  if (stdDev === null) return "N/A"; // Handle case for players with less than 40 total points
+
+  if (stdDev <= 4) return 'A+';  // Most consistent
+  if (stdDev <= 4.75) return 'A';  // Most consistent
+  if (stdDev <= 5.5) return 'A-';  // Most consistent
+  if (stdDev <= 6.25) return 'B+';  // Most consistent
+  if (stdDev <= 7) return 'B';  // Most consistent
+  if (stdDev <= 7.75) return 'B-';  // Most consistent
+  if (stdDev <= 8.50) return 'C+';  // Most consistent
+  if (stdDev <= 9.25) return 'C';  
+  if (stdDev <= 10) return 'C-';  
+  if (stdDev <= 12) return 'D';  
+  return 'F'; // Least consistent
+};
 
 const analyzePlayer = (Player: Player) => {
   if (Player.Pos === 'QB' || Player.Pos === 'TE') {
     if (Player.Rankbypos === 1) {
-      return 'A+: best at Position!';
-    } else if (Player.Rankbypos >= 2 && Player.Rankbypos <= 5) {
-      return 'A:';
-    } else if (Player.Rankbypos > 5 && Player.Rankbypos <= 10) {
+      return 'A+';
+    } else if (Player.Rankbypos >= 2 && Player.Rankbypos <= 4) {
+      return 'A';
+    } else if (Player.Rankbypos > 4 && Player.Rankbypos <= 7) {
+      return 'A-';
+    } else if (Player.Rankbypos > 7 && Player.Rankbypos <= 10) {
+      return 'A-';
+    }else if (Player.Rankbypos > 10 && Player.Rankbypos <= 13) {
+      return 'B+';
+    }else if (Player.Rankbypos > 13 && Player.Rankbypos <= 16) {
       return 'B';
-    } else if (Player.Rankbypos > 10 && Player.Rankbypos <= 15) {
+    } else if (Player.Rankbypos > 16 && Player.Rankbypos <= 19) {
+      return 'B-';
+    } 
+    else if (Player.Rankbypos > 19 && Player.Rankbypos <= 22) {
+      return 'C+';
+    } 
+    else if (Player.Rankbypos > 22 && Player.Rankbypos <= 24) {
       return 'C';
-    } else if (Player.Rankbypos > 15 && Player.Rankbypos <= 20) {
+    } 
+    else if (Player.Rankbypos > 24 && Player.Rankbypos <= 26) {
+      return 'C-';
+    } 
+    else if (Player.Rankbypos > 26 && Player.Rankbypos <= 28) {
       return 'D';
     } else {
       return 'F';
@@ -36,15 +82,26 @@ const analyzePlayer = (Player: Player) => {
   } else if (Player.Pos === 'WR' || Player.Pos === 'RB') {
     if (Player.Rankbypos === 1) {
       return 'A+';
-    } else if (Player.Rankbypos > 2 && Player.Rankbypos <= 5) {
+    } else if (Player.Rankbypos > 2 && Player.Rankbypos <= 6) {
       return 'A';
-    } else if (Player.Rankbypos > 5 && Player.Rankbypos <= 10) {
-      return 'B';
+    } else if (Player.Rankbypos > 6 && Player.Rankbypos <= 10) {
+      return 'A-';
     } else if (Player.Rankbypos > 10 && Player.Rankbypos <= 15) {
-      return 'C';
+      return 'B+';
     } else if (Player.Rankbypos > 15 && Player.Rankbypos <= 20) {
+      return 'B';
+    } 
+    else if (Player.Rankbypos > 20 && Player.Rankbypos <= 25) {
+      return 'B-';
+    } else if (Player.Rankbypos > 25 && Player.Rankbypos <= 30) {
+      return 'C+';
+    } else if (Player.Rankbypos > 30 && Player.Rankbypos <= 35) {
+      return 'C';
+    } else if (Player.Rankbypos > 35 && Player.Rankbypos <= 40) {
+      return 'C-';
+    } else if (Player.Rankbypos > 40 && Player.Rankbypos <= 50) {
       return 'D';
-    } else {
+    }else {
       return 'F';
     }
   }
@@ -53,21 +110,16 @@ const analyzePlayer = (Player: Player) => {
 
 const calculateConsistency = (Player: Player): [string, number | null] => {
   const weeklyPoints = [
-    Player.week1_points,
-    Player.week2_points,
-    Player.week3_points,
-    Player.week4_points,
-    Player.week5_points,
-    Player.week6_points,
+    Player.WK1Pts,
+    Player.WK2Pts,
+    Player.WK3Pts,
+    Player.WK4Pts,
+    Player.WK5Pts,
+    Player.WK6Pts,
   ];
 
   const totalPoints = weeklyPoints.reduce((acc, points) => acc + points, 0);
   
-  // If total points are less than 40, return "N/A" and null for stdDev
-  if (totalPoints < 40) {
-    return ["N/A", null];
-  }
-
   // Calculate standard deviation for consistency
   const mean = totalPoints / weeklyPoints.length;
   const variance =
@@ -75,9 +127,8 @@ const calculateConsistency = (Player: Player): [string, number | null] => {
     weeklyPoints.length;
 
   const stdDev = Math.sqrt(variance);
-  return [totalPoints.toString(), stdDev]; // Convert totalPoints to string for rendering
+  return [totalPoints.toString(), stdDev]; // Return stdDev as number
 };
-
 
 
 const TeamAnalyzerPage: NextPage = () => {
@@ -93,26 +144,22 @@ const TeamAnalyzerPage: NextPage = () => {
         }
         let data = await response.json(); // Parse the JSON
         
-        data.sort((a: Player, b: Player) => {
-          // First sort by Player name
-
-
+        const filteredPlayers = data.filter((Player: Player) => {
+          const totalPoints = Player.WK1Pts + Player.WK2Pts + Player.WK3Pts + Player.WK4Pts + Player.WK5Pts + Player.WK6Pts;
+          return totalPoints >= 50;
+        });
+  
+        // Sort filtered players
+        filteredPlayers.sort((a: Player, b: Player) => {
           if (a.Pos < b.Pos) return -1;
           if (a.Pos > b.Pos) return 1;
-
-
           if (a.Player < b.Player) return -1;
           if (a.Player > b.Player) return 1;
-        
-          // If Player names are the same, sort by Pos
-          
-        
-          // If both Player name and Pos are the same, sort by Rankbypos
           return a.Rankbypos - b.Rankbypos;
         });
 
-        setPlayers(data); // Update state with fetched Players
-        console.log(data); // Log the fetched data for debugging
+        setPlayers(filteredPlayers); // Update state with fetched Players
+        console.log(filteredPlayers); // Log the fetched data for debugging
       } catch (err) {
         setError('Failed to load Players data');
       }
@@ -138,22 +185,28 @@ const TeamAnalyzerPage: NextPage = () => {
       <tr>
         <th>Name</th>
         <th>Position</th>
-        <th>Analysis</th> {/* New column for Rankbypos */}
+        <th>Overall Grade</th> {/* New column for Rankbypos */}
+        <th>Total Points</th>
         <th>Consistency Rating</th> {/* New column for Rankbypos */}
       </tr>
     </thead>
     <tbody>
-  {Players.map((Player, index) => {
+            {Players.map((Player, index) => {
+              const [totalPoints, stdDev] = calculateConsistency(Player); // Destructure the returned values
+              const grade = getConsistencyGrade(stdDev); // Get the consistency grade
+              const week6Performance = calculateWeek6Performance(Player); // Calculate Week 6 performance
 
-    return (
-      <tr key={index}>
-        <td className={styles.td}>{Player.Player}</td>
-        <td className={styles.td}>{Player.Pos}</td> {/* Will show "N/A" if under 40 */}
-        <td className={styles.td}>{analyzePlayer(Player)}</td> {/* Player rating */}
-      </tr>
-    );
-  })}
-</tbody>
+              return (
+                <tr key={index}>
+                  <td className={styles.td}>{Player.Player}</td>
+                  <td className={styles.td}>{Player.Pos}</td>
+                  <td className={styles.td}>{analyzePlayer(Player)}</td>
+                  <td className={styles.td}>{totalPoints}</td>
+                  <td className={styles.td}>{grade}</td>
+                </tr>
+              );
+            })}
+          </tbody>
   </table>
 </div>
     </div>

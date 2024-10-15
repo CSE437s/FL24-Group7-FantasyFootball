@@ -15,46 +15,53 @@
   align-items: center;
   justify-content: center;
   margin-top: 100px; /* Space between title and content */
-  text-align: center; /* Center the text */
+  text-align: center;
   width: 100%; /* Allow content to take full width */
+  max-width: 1600px; /* Set a maximum width for better readability */
 }
 
 .playerTable {
-  width: 90%; /* Increase table width */
-  border-collapse: collapse; /* Collapse borders for a cleaner look */
+  width: 100%; /* Make the table take the full width */
+  max-width: 1600px; /* Set a max-width for readability */
+  border-collapse: separate; /* Ensure separated borders */
+  border-spacing: 50px 30px; /* LARGE spacing between cells */
   margin: 0 auto; /* Center the table */
 }
 
 .playerTable th, .playerTable td {
-  padding: 15px; /* Add padding for better spacing */
+  padding: 30px 50px; /* MASSIVE padding for larger spaces */
   text-align: left; /* Align text to the left */
+  font-size: 1.2rem; /* Slightly increase the font size */
+  line-height: 1.8; /* Increase line height for more text spacing */
 }
 
 .playerTable th {
-  background-color: rgba(255, 255, 255, 0.2); /* Lightly shaded header */
+  background-color: rgba(255, 255, 255, 0.3); /* Slightly darker header */
   color: white; /* White text for the header */
+  font-size: 1.5rem; /* Larger header text */
 }
 
 .playerTable tr:nth-child(even) {
-  background-color: rgba(255, 255, 255, 0.1); /* Lightly shaded even rows */
+  background-color: rgba(255, 255, 255, 0.25); /* Shaded even rows */
 }
 
 .playerTable tr:nth-child(odd) {
-  background-color: rgba(255, 255, 255, 0.2); /* Lightly shaded odd rows */
+  background-color: rgba(255, 255, 255, 0.15); /* Shaded odd rows */
 }
 
 .playerTable tr:hover {
-  background-color: rgba(255, 255, 255, 0.3); /* Highlight rows on hover */
+  background-color: rgba(255, 255, 255, 0.4); /* Highlight row on hover */
 }
 
 .title {
-  font-size: 2.5rem; /* Larger title size */
-  margin-bottom: 1.5rem; /* Increase space below the title */
+  font-size: 3rem; /* Large title size */
+  margin-bottom: 2rem; /* Increase space below the title */
   position: absolute; /* Position the title at the top */
   top: 20px; /* Distance from the top */
   left: 50%; /* Center horizontally */
   transform: translateX(-50%); /* Adjust horizontal center */
 }
+
 
 .leagueteam {
   margin-top: 100px; /* Add space above the league/team name */
