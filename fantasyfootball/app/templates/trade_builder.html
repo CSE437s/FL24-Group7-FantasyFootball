@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Trade Builder - Yahoo Fantasy Football MVP{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Trade Builder</h1>
+    <form method="POST">
+        <label for="team1">Select your team:</label>
+        <select name="team1" id="team1">
+            {% for team in teams %}
+                <option value="{{ team }}" {% if team == request.form.team1 %}selected{% endif %}>{{ team }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="team2">Select opposing team:</label>
+        <select name="team2" id="team2">
+            {% for team in teams %}
+                <option value="{{ team }}" {% if team == request.form.team2 %}selected{% endif %}>{{ team }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Get Rosters</button>
+    </form>
+
+    {% if team1_roster and team2_roster %}
+        <h2>Team 1 Roster</h2>
+        <form method="POST">
+            <input type="hidden" name="team1" value="{{ request.form.team1 }}">
+            <input type="hidden" name="team2" value="{{ request.form.team2 }}">
+            <label for="your_player">Select a player to trade:</label>
+            <select name="your_player" id="your_player">
+                {% for player in team1_roster %}
+                    <option value="{{ player[0] }}">{{ player[0] }} ({{ player[1] }} - Rank: {{ player[2] }})</option>
+                {% endfor %}
+            </select>
+
+            <h2>Team 2 Roster</h2>
+            <label for="target_player">Select a player to receive:</label>
+            <select name="target_player" id="target_player">
+                {% for player in team2_roster %}
+                    <option value="{{ player[0] }}">{{ player[0] }} ({{ player[1] }} - Rank: {{ player[2] }})</option>
+                {% endfor %}
+            </select>
+
+            <button type="submit">Propose Trade</button>
+        </form>
+    {% endif %}
+
+    {% if trade_feedback %}
+        <p>{{ trade_feedback }}</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Yahoo Fantasy Football MVP{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Select a League</h1>
+    <form method="POST">
+        <label for="league_id">Choose a league:</label>
+        <select name="league_id" id="league_id">
+            {% for league in leagues %}
+                <option value="{{ league.league_id }}">{{ league.name }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Select League</button>
+    </form>
+
+    {% if player_and_teams_loaded %}
+        <h2>Connected!</h2>
+        <!-- <h3>Players:</h3>
+        <ul>
+            {% for player in players %}
+                <li>{{ player.name }} - Position: {{ player.position }}</li>
+            {% endfor %}
+        </ul> -->
+    {% endif %}
+</div>
+{% endblock %}

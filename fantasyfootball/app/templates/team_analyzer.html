@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Team Analyzer - Yahoo Fantasy Football MVP{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Team Analyzer</h1>
+    <form method="POST">
+        <label for="team">Select a team:</label>
+        <select name="team" id="team">
+            {% for team in teams %}
+            <option value="{{ team }}" {% if team==selected_team %}selected{% endif %}>{{ team }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Analyze Team</button>
+    </form>
+
+    {% if selected_team %}
+    <h2>Analysis for {{ selected_team }}</h2>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>Position</th>
+                    <th>Rank</th>
+                    <th>Wk 1 Points</th>
+                    <th>Wk 2 Points</th>
+                    <th>Wk 3 Points</th>
+                    <th>Wk 4 Points</th>
+                    <th>Wk 5 Points</th>
+                    <th>Wk 6 Points</th>
+                    <th>Total Points</th>
+                    <th>Consistency Grade</th>
+                    <th>Ovr Grade</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for player in players %}
+                <tr>
+                    <td>{{ player.Player }}</td>
+                    <td>{{ player.Pos }}</td>
+                    <td>{{ player.Rankbypos }}</td>
+                    <td>{{ player.WK1Pts }}</td>
+                    <td>{{ player.WK2Pts }}</td>
+                    <td>{{ player.WK3Pts }}</td>
+                    <td>{{ player.WK4Pts }}</td>
+                    <td>{{ player.WK5Pts }}</td>
+                    <td>{{ player.WK6Pts }}</td>
+                    <td>{{ player.total_points }}</td>
+                    <td>{{ player.std_dev }}</td>
+                    <td>{{ player.grade }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

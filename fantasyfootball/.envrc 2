@@ -1,4 +1,0 @@
-export YAHOO_CLIENT_ID="dj0yJmk9NklRNjBYMjAyb2NEJmQ9WVdrOVVGTnpSMFZOWXpjbWNHbzlNQT09JnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PTdi"
-export YAHOO_CLIENT_SECRET="40d979a78d5cdab3541fc99b1ca6412ef0b26345"
-export YAHOO_REDIRECT_URI='https://localhost:3000/api/yahoo-oauth'
-# export YAHOO_REDIRECT_URI="https://c0c7-128-252-229-216.ngrok-free.app/api/yahoo-oauth"
