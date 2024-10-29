@@ -10,7 +10,10 @@ from app.routes import api, main
 
 
 # Load environment variables
-load_dotenv()
+load_dotenv(override=True)
+
+print(os.getenv('YAHOO_ACCESS_TOKEN_JSON'))
+
 
 app = create_app()
 app.register_blueprint(api, url_prefix='/api')

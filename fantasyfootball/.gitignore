@@ -7,6 +7,8 @@ venv/
 
 #ignore pycache
 __pycache__/
+/*.pyc
+
 
 ../.DS_Store
 cert.pem
@@ -14,3 +16,7 @@ key.pem
 
 #ignore data folder and all contents
 data/
+
+.vscode/
+../.DS_Store
+.DS_Store
