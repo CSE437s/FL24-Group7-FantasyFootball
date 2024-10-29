@@ -5,6 +5,9 @@
 {% block content %}
 <div class="container">
     <h1>Team Analyzer</h1>
+    <p class="page-description">
+        {% block description %}Use this page to evaluate the strengths and weaknesses of your fantasy team{% endblock %}
+    </p>
     <form method="POST">
         <label for="team">Select a team:</label>
         <select name="team" id="team">
@@ -38,7 +41,12 @@
             <tbody>
                 {% for player in players %}
                 <tr>
-                    <td>{{ player.Player }}</td>
+                    <td>
+                        {{ player.Player }}
+                        <a href="#" class="info-icon" data-player-name="{{ player.Player }}" style="margin-left: 5px;">
+                            <i class="fas fa-info-circle"></i> <!-- Font Awesome info icon -->
+                        </a>
+                    </td>
                     <td>{{ player.Pos }}</td>
                     <td>{{ player.Rankbypos }}</td>
                     <td>{{ player.WK1Pts }}</td>
@@ -57,4 +65,111 @@
     </div>
     {% endif %}
 </div>
+
+<!-- Player Info Dashboard Modal -->
+<div id="playerDashboard" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span id="closeDashboard" class="close">&times;</span>
+        <h3 id="dashboardPlayerName"></h3>
+        <p id="dashboardPlayerPosition"></p>
+
+        <!-- Add sections for analysis -->
+        <div class="dashboard-section">
+            <h4>Recent Performance</h4>
+            <ul id="recentPerformance"></ul> <!-- Populate with JavaScript -->
+        </div>
+
+        <div class="dashboard-section">
+            <h4>Projected Points</h4>
+            <p id="projectedPoints">Loading...</p>
+        </div>
+
+        <div class="dashboard-section">
+            <h4>Matchup Analysis</h4>
+            <p id="matchupAnalysis">Loading...</p>
+        </div>
+    </div>
+</div>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<!-- JavaScript for Info Icon Click Event -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Handle info icon click
+        $('.info-icon').on('click', function(event) {
+            event.preventDefault();  // Prevent default link behavior
+            const playerName = $(this).data('player-name');  // Get player name from data attribute
+
+            // Populate the dashboard with player name and placeholder data
+            $('#dashboardPlayerName').text(playerName);
+            $('#dashboardPlayerPosition').text("Position: Loading...");
+            $('#recentPerformance').html("<li>Loading recent stats...</li>");
+            $('#projectedPoints').text("Calculating...");
+            $('#matchupAnalysis').text("Analyzing...");
+
+            // Simulate fetching data for now
+            setTimeout(function() {
+                $('#dashboardPlayerPosition').text("Position: RB"); // Example position
+                $('#recentPerformance').html("<li>Week 7: 12.4 points</li><li>Week 6: 8.3 points</li>");
+                $('#projectedPoints').text("15.6 points");
+                $('#matchupAnalysis').text("Upcoming matchup favors the player's rushing potential.");
+            }, 500);
+
+            // Display the modal
+            $('#playerDashboard').show();
+        });
+
+        // Close the dashboard when the close icon is clicked
+        $('#closeDashboard').on('click', function() {
+            $('#playerDashboard').hide();
+        });
+
+        // Close the dashboard when clicking outside of the modal content
+        $(window).on('click', function(event) {
+            if ($(event.target).is('#playerDashboard')) {
+                $('#playerDashboard').hide();
+            }
+        });
+    });
+</script>
+
+<style>
+    /* Add your CSS styles for the modal here */
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background-color: #fff;
+        padding: 20px;
+        width: 400px;
+        border-radius: 8px;
+        text-align: center;
+        position: relative; /* Added to position close button */
+    }
+
+    .close {
+        position: absolute;
+        top: 10px;
+        right: 20px;
+        cursor: pointer;
+        font-size: 1.5em;
+        color: #333; /* Added color to close button */
+    }
+
+    .close:hover {
+        color: #ff0000; /* Change color on hover */
+    }
+</style>
 {% endblock %}

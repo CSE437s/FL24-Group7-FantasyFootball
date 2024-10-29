@@ -2,9 +2,14 @@
 
 {% block title %}Home - Yahoo Fantasy Football MVP{% endblock %}
 
+
 {% block content %}
+
 <div class="container">
     <h1>Select a League</h1>
+    <p class = "page-description">
+        {% block description %}Welcome to Yahoo Fantasy Football MVP! To get started, make sure you are logged in to your Yahoo account and select a league to start learning some new insights!{% endblock %}
+    </p>
     <form method="POST">
         <label for="league_id">Choose a league:</label>
         <select name="league_id" id="league_id">

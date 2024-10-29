@@ -4,21 +4,173 @@
 
 {% block content %}
 <div class="container">
-    <h1>Waiver Wire Suggestions</h1>
+    <h1>Waiver Wire</h1>
+
+    <p class="page-description">
+        Use this page to view top waiver wire players available in your fantasy league. Filter by position to narrow down suggestions and navigate between pages to see more players.
+    </p>
+
     <section class="waiver-wire">
         <h2>Top Waiver Picks</h2>
-        <ul style="list-style-type: none; padding: 0; text-align: center;">
-            {% for player in waiver_wire_players %}
-            <li style="display: inline-block; margin: 10px; text-align: left;">
-                <div style="border: 1px solid #ccc; padding: 10px; border-radius: 5px;">
-                <h3>{{ player.name }}</h3>
-                <p>Position: {{ player.position }}</p>
-                <p>{{ player.position }} Ranking: {{ player.projection }}</p>
-                <!-- More player details -->
-                </div>
-            </li>
+
+        <div class="position-filter mb-3">
+            {% for pos in ["", "QB", "RB", "WR", "TE"] %}
+                <label class="mr-3">
+                    <input type="radio" name="positionFilter" value="{{ pos }}" {% if position_filter == pos %}checked{% endif %}>
+                    {{ pos if pos else "All" }}
+                </label>
             {% endfor %}
-        </ul>
+        </div>
+
+        <!-- Waiver Wire Table -->
+        <div class="table-responsive">
+            <table id="waiverTable" class="table table-striped table-bordered table-hover">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>Position</th>
+                        <th>Position Ranking</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for player in waiver_wire_players %}
+                    <tr>
+                        <td>
+                            {{ player.name }}
+                            <a href="#" class="info-icon" data-player-name="{{ player.name }}" style="margin-left: 5px;">
+                                <i class="fas fa-info-circle"></i> <!-- Font Awesome info icon -->
+                            </a>
+                        </td>
+                        <td class="player-position">{{ player.position }}</td>
+                        <td>{{ player.projection }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="pagination-controls mt-3">
+            <p>Page {{ page }} of {{ total_pages }}</p>
+            {% if page > 1 %}
+                <a href="{{ url_for('main.waiver_wire', page=page-1, positionFilter=position_filter) }}" class="btn btn-primary">Previous</a>
+            {% endif %}
+            {% if page < total_pages %}
+                <a href="{{ url_for('main.waiver_wire', page=page+1, positionFilter=position_filter) }}" class="btn btn-primary">Next</a>
+            {% endif %}
+        </div>
     </section>
+
+    <!-- Player Info Dashboard Modal -->
+    <div id="playerDashboard" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span id="closeDashboard" class="close">&times;</span>
+            <h3 id="dashboardPlayerName"></h3>
+            <p id="dashboardPlayerPosition"></p>
+
+            <!-- Add sections for analysis -->
+            <div class="dashboard-section">
+                <h4>Recent Performance</h4>
+                <ul id="recentPerformance"></ul> <!-- Populate with JavaScript -->
+            </div>
+
+            <div class="dashboard-section">
+                <h4>Projected Points</h4>
+                <p id="projectedPoints">Loading...</p>
+            </div>
+
+            <div class="dashboard-section">
+                <h4>Matchup Analysis</h4>
+                <p id="matchupAnalysis">Loading...</p>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- jQuery and Font Awesome -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<script>
+    $(document).ready(function() {
+        // Radio button change for position filtering
+        $('input[name="positionFilter"]').on('change', function() {
+            const selectedPosition = $(this).val();
+            window.location.href = "{{ url_for('main.waiver_wire') }}" + "?positionFilter=" + selectedPosition;
+        });
+
+        // Handle info icon click
+        $('.info-icon').on('click', function(event) {
+            event.preventDefault();  // Prevent default link behavior
+            const playerName = $(this).data('player-name');  // Get player name from data attribute
+
+            // Populate the dashboard with player name and placeholder data
+            $('#dashboardPlayerName').text(playerName);
+            $('#dashboardPlayerPosition').text("Position: Loading...");
+            $('#recentPerformance').html("<li>Loading recent stats...</li>");
+            $('#projectedPoints').text("Calculating...");
+            $('#matchupAnalysis').text("Analyzing...");
+
+            // Display the modal
+            $('#playerDashboard').show();
+
+            // Simulate fetching data for now
+            setTimeout(function() {
+                $('#dashboardPlayerPosition').text("Position data pull"); // Example position
+                $('#recentPerformance').html("Recent performance analysis");
+                $('#projectedPoints').text("Upcoming projection");
+                $('#matchupAnalysis').text("Some special analysis");
+            }, 500);
+        });
+
+        // Close the dashboard when the close icon is clicked
+        $('#closeDashboard').on('click', function() {
+            $('#playerDashboard').hide();
+        });
+        
+        // Close the dashboard when clicking outside of the modal content
+        $(window).on('click', function(event) {
+            if ($(event.target).is('#playerDashboard')) {
+                $('#playerDashboard').hide();
+            }
+        });
+    });
+</script>
+
+<style>
+    /* Add your CSS styles for the modal here */
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background-color: #fff;
+        padding: 20px;
+        width: 400px;
+        border-radius: 8px;
+        text-align: center;
+        position: relative; /* Added to position close button */
+    }
+
+    .close {
+        position: absolute;
+        top: 10px;
+        right: 20px;
+        cursor: pointer;
+        font-size: 1.5em;
+        color: #333; /* Added color to close button */
+    }
+
+    .close:hover {
+        color: #ff0000; /* Change color on hover */
+    }
+</style>
 {% endblock %}

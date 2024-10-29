@@ -182,17 +182,31 @@ def update_ownership():
 @main.route("/waiver-wire")
 def waiver_wire():
     try:
+        # Get the current page number and position filter from query parameters
+        page = request.args.get('page', 1, type=int)
+        position_filter = request.args.get('positionFilter', '', type=str)
+        per_page = 25  # Number of players per page
+
         # Get connection from the pool
         connection = get_connection()
         cursor = connection.cursor()
 
-        # Query players for waiver wire (e.g., WR and RB positions)
-        cursor.execute(
-            'SELECT "Player", "Pos", "Rankbypos" FROM "seasonstats" WHERE "fantasy_owner" IS NULL'
-        )
+        # Modify SQL query based on position filter
+        if position_filter:
+            cursor.execute(
+                'SELECT "Player", "Pos", "Rankbypos" FROM "seasonstats" '
+                'WHERE "fantasy_owner" IS NULL AND "Pos" = %s',
+                (position_filter,)
+            )
+        else:
+            cursor.execute(
+                'SELECT "Player", "Pos", "Rankbypos" FROM "seasonstats" '
+                'WHERE "fantasy_owner" IS NULL'
+            )
 
         rows = cursor.fetchall()
 
+        # Convert rows to dictionary format
         waiver_wire_players = [
             {
                 "name": row[0],
@@ -202,14 +216,24 @@ def waiver_wire():
             for row in rows
         ]
 
+        # Calculate pagination
+        total = len(waiver_wire_players)
+        total_pages = (total + per_page - 1) // per_page  # Calculate total pages
+        start = (page - 1) * per_page
+        end = start + per_page
+        paginated_players = waiver_wire_players[start:end]
+
         # Close cursor and release connection
         cursor.close()
         release_connection(connection)
 
-        # Render the waiver_wire template with player data
+        # Render the waiver_wire template with paginated player data and filter info
         return render_template(
             "waiver_wire.html",
-            waiver_wire_players=waiver_wire_players,
+            waiver_wire_players=paginated_players,
+            page=page,
+            total_pages=total_pages,
+            position_filter=position_filter
         )
 
     except Exception as error:
@@ -294,7 +318,7 @@ def team_analyzer():
         cursor.close()
         release_connection(connection)
         
-        teams = [team[0] for team in all_teams]
+        teams = [team[0] for team in all_teams if team[0] is not None]
         selected_team = None
         players = []
 
@@ -342,7 +366,8 @@ def trade_builder():
     cursor.close()
     release_connection(connection)
 
-    teams = [team[0] for team in all_teams]
+    teams = [team[0] for team in all_teams if team[0] is not None]
+
     team1_roster = []
     team2_roster = []
     trade_feedback = None
@@ -377,6 +402,7 @@ def trade_builder():
             target_player = request.form.get("target_player")
             trade_feedback = f'You proposed trading {your_player} for {target_player}.'
 
+
     return render_template(
         "trade_builder.html",
         teams=teams,
@@ -384,3 +410,9 @@ def trade_builder():
         team2_roster=team2_roster,
         trade_feedback=trade_feedback,
     )
+
+
+# 
+#
+#
+#

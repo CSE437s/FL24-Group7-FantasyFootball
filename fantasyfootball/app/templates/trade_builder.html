@@ -5,50 +5,185 @@
 {% block content %}
 <div class="container">
     <h1>Trade Builder</h1>
-    <form method="POST">
-        <label for="team1">Select your team:</label>
-        <select name="team1" id="team1">
-            {% for team in teams %}
-                <option value="{{ team }}" {% if team == request.form.team1 %}selected{% endif %}>{{ team }}</option>
-            {% endfor %}
-        </select>
+    <p class="page-description">
+        {% block description %}Build and analyze potential trades to improve your fantasy team. Select players from both teams and click the "propose trade" button to share with friends!{% endblock %}
+    </p>
 
-        <label for="team2">Select opposing team:</label>
-        <select name="team2" id="team2">
-            {% for team in teams %}
-                <option value="{{ team }}" {% if team == request.form.team2 %}selected{% endif %}>{{ team }}</option>
-            {% endfor %}
-        </select>
+    <!-- First form to select teams and get rosters -->
+    <div id="getRostersSection">
+        <form method="POST" id="getRostersForm" class="roster-form">
+            <div class="team-selection-container">
+                <div class="team-select-wrapper">
+                    <label for="team1">Select first team:</label>
+                    <select name="team1" id="team1" class="team-select">
+                        {% for team in teams %}
+                            <option value="{{ team }}" {% if team == request.form.team1 %}selected{% endif %}>{{ team }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-        <button type="submit">Get Rosters</button>
-    </form>
+                <div class="team-select-wrapper">
+                    <label for="team2">Select second team:</label>
+                    <select name="team2" id="team2" class="team-select">
+                        {% for team in teams %}
+                            <option value="{{ team }}" {% if team == request.form.team2 %}selected{% endif %}>{{ team }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
 
-    {% if team1_roster and team2_roster %}
-        <h2>Team 1 Roster</h2>
-        <form method="POST">
-            <input type="hidden" name="team1" value="{{ request.form.team1 }}">
-            <input type="hidden" name="team2" value="{{ request.form.team2 }}">
-            <label for="your_player">Select a player to trade:</label>
-            <select name="your_player" id="your_player">
-                {% for player in team1_roster %}
-                    <option value="{{ player[0] }}">{{ player[0] }} ({{ player[1] }} - Rank: {{ player[2] }})</option>
-                {% endfor %}
-            </select>
-
-            <h2>Team 2 Roster</h2>
-            <label for="target_player">Select a player to receive:</label>
-            <select name="target_player" id="target_player">
-                {% for player in team2_roster %}
-                    <option value="{{ player[0] }}">{{ player[0] }} ({{ player[1] }} - Rank: {{ player[2] }})</option>
-                {% endfor %}
-            </select>
-
-            <button type="submit">Propose Trade</button>
+            <button type="submit" class="btn">Get Rosters</button>
         </form>
-    {% endif %}
+    </div>
 
-    {% if trade_feedback %}
-        <p>{{ trade_feedback }}</p>
-    {% endif %}
+    <div class="roster-section" style="display: none;">
+        <button id="switchTeamsButton" class="btn">Reselect Teams</button>
+        <div class="team-container">
+            <div class="team1">
+                <h2>{{ request.form.team1 }}</h2>
+                <form method="POST" id="tradeForm" onsubmit="return confirmTrade();" class="trade-form">
+                    <input type="hidden" name="team1" value="{{ request.form.team1 }}">
+                    <input type="hidden" name="team2" value="{{ request.form.team2 }}">
+                    <label for="your_players">Select one or more players to trade:</label>
+                    <div id="your_players_container" class="player-container">
+                        <select name="your_players" class="your_players">
+                            {% for player in team1_roster %}
+                                <option value="{{ player[0] }}">{{ player[0] }} ({{ player[1] }} - Rank: {{ player[2] }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="button" id="addYourPlayerButton" class="btn">Add Another Player</button>
+                </form>
+            </div>
+
+            <div class="team2">
+                <h2>{{ request.form.team2 }}</h2>
+                <form method="POST" id="tradeForm" onsubmit="return confirmTrade();" class="trade-form">
+                    <label for="target_players">Select one or more players to trade:</label>
+                    <div id="target_players_container" class="player-container">
+                        <select name="target_players" class="target_players">
+                            {% for player in team2_roster %}
+                                <option value="{{ player[0] }}">{{ player[0] }} ({{ player[1] }} - Rank: {{ player[2] }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="button" id="addTargetPlayerButton" class="btn">Add Another Player</button>
+                    <button type="submit" class="btn">Propose Trade</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="tradeMessage" style="margin-top: 20px; font-size: 1.1em; font-weight: bold;"></div>
+    <button id="copyTradeButton" class="btn" style="display: none; margin-top: 10px;">Copy Trade</button>
+    <button id="restartTradeButton" class="btn" style="display: none; margin-top: 10px;">Restart Trade Builder</button>    
 </div>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#addYourPlayerButton').on('click', function() {
+            $('#your_players_container').append(`
+                <select name="your_players" class="your_players">
+                    {% for player in team1_roster %}
+                        <option value="{{ player[0] }}">{{ player[0] }} ({{ player[1] }} - Rank: {{ player[2] }})</option>
+                    {% endfor %}
+                </select>
+            `);
+        });
+
+        $('#addTargetPlayerButton').on('click', function() {
+            $('#target_players_container').append(`
+                <select name="target_players" class="target_players">
+                    {% for player in team2_roster %}
+                        <option value="{{ player[0] }}">{{ player[0] }} ({{ player[1] }} - Rank: {{ player[2] }})</option>
+                    {% endfor %}
+                </select>
+            `);
+        });
+
+        $('#getRostersForm').on('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+            $('#getRostersSection').hide(); // Hide the team selection section
+            $('.roster-section').show(); // Show the roster selection panel
+        });
+
+        $('#switchTeamsButton').on('click', function() {
+            resetTrade();
+        });
+    });
+
+    function confirmTrade() {
+    var yourPlayers = [];
+    var targetPlayers = [];
+
+    // Collect selected players from your players dropdown
+    $('select[name="your_players"]').each(function() {
+        yourPlayers.push($(this).val());
+    });
+
+    // Collect selected players from target players dropdown
+    $('select[name="target_players"]').each(function() {
+        targetPlayers.push($(this).val());
+    });
+
+    // Get the team names and replace any HTML entities
+    var team1 = "{{ request.form.team1 }}".replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+    var team2 = "{{ request.form.team2 }}".replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+
+    // Create the message with each player on a new line
+    var message = "<strong>" + team1 + " trades:</strong><br>" + yourPlayers.join('<br>') + 
+                  "<br><br><strong>" + team2 + " trades:</strong><br>" + targetPlayers.join('<br>');
+
+    // Display the message in the tradeMessage div
+    document.getElementById('tradeMessage').innerHTML = message;
+
+    // Show the Copy Trade and Restart Trade Builder buttons
+    document.getElementById('copyTradeButton').style.display = 'inline-block';
+    document.getElementById('restartTradeButton').style.display = 'inline-block';
+
+    // Hide the roster selection and roster display sections
+    $('#getRostersSection').hide();
+    $('.roster-section').hide();
+
+    return false; // Prevent form submission
+}
+
+// Copy the trade message to the clipboard
+document.getElementById('copyTradeButton').addEventListener('click', function() {
+    var tradeText = document.getElementById('tradeMessage').innerText;
+    navigator.clipboard.writeText(tradeText).then(function() {
+        alert("Trade details copied to clipboard!");
+    }).catch(function(error) {
+        console.error("Copy failed", error);
+    });
+});
+
+// Restart Trade Builder functionality
+document.getElementById('restartTradeButton').addEventListener('click', function() {
+    // Clear trade message and hide buttons
+    document.getElementById('tradeMessage').innerHTML = '';
+    document.getElementById('copyTradeButton').style.display = 'none';
+    document.getElementById('restartTradeButton').style.display = 'none';
+
+    // Show the get rosters section again
+    $('#getRostersSection').show();
+});
+
+document.getElementById('switchTeamsButton').addEventListener('click', function() {
+    // Clear trade message and hide buttons
+    document.getElementById('tradeMessage').innerHTML = '';
+    document.getElementById('copyTradeButton').style.display = 'none';
+    document.getElementById('restartTradeButton').style.display = 'none';
+
+
+    // Show the get rosters section again
+    $('#getRostersSection').show();
+    $('.roster-section').hide(); // Show the roster selection panel
+});
+
+
+</script>
 {% endblock %}
