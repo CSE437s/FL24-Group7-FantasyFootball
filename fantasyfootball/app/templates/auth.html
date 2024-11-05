@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Verify Code</h2>
+    <form method="post" action="{{ url_for('api.callback') }}">
+        <label for="verification_code">Enter Verification Code:</label>
+        <input type="text" id="verification_code" name="verification_code" required>
+        <button type="submit">Verify</button>
+    </form>
+{% endblock %}

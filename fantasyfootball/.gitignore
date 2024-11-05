@@ -1,5 +1,6 @@
 # ignore .env
 .env
+
 .dockerignore
 Dockerfile
 # venv folder and all content
@@ -7,11 +8,12 @@ venv/
 
 #ignore pycache
 __pycache__/
-/*.pyc
+*.pyc
 
 
 ../.DS_Store
 cert.pem
+.DS_Store
 key.pem
 
 #ignore data folder and all contents

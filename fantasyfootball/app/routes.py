@@ -1,4 +1,5 @@
-from flask import Blueprint, jsonify, request, redirect, url_for
+# /app/routes.py
+from flask import Blueprint, jsonify, request, redirect, url_for, session
 import os
 from yfpy.query import YahooFantasySportsQuery
 from pathlib import Path
@@ -7,9 +8,19 @@ import json
 import pandas as pd
 import psycopg2
 from psycopg2 import pool
-from app.db import get_connection, release_connection
+from app.db import (
+    get_connection,
+    release_connection,
+    save_access_token,
+    get_access_token,
+)
 import numpy as np
 from dotenv import load_dotenv
+import webbrowser
+import sys
+from io import StringIO
+from flask import g
+
 
 load_dotenv(override=True)
 
@@ -17,6 +28,7 @@ load_dotenv(override=True)
 # Define a Blueprint for the API routes
 api = Blueprint("api", __name__)
 main = Blueprint("main", __name__)
+
 
 def extract_serializable_data(obj):
     # If the object has '_extracted_data', use it
@@ -39,47 +51,64 @@ def extract_serializable_data(obj):
     else:
         return str(obj)  # Convert to string as a last resort
 
-@api.route("/auth", methods=["GET"])
+
+@api.route("/auth", methods=["GET", "POST"])
 def auth():
     redirect_uri = os.getenv("REDIRECT_URI")
     client_id = os.getenv("YAHOO_CLIENT_ID")
     client_secret = os.getenv("YAHOO_CLIENT_SECRET")
     response_type = "code"
-    print('hellothere')
-    return redirect(
+    print("hellothere")
+    webbrowser.open_new_tab(
         f"https://api.login.yahoo.com/oauth2/request_auth?client_id={client_id}&client_secret={client_secret}&redirect_uri={redirect_uri}&response_type={response_type}"
     )
+    print("opened new browser tab")
+    return render_template("auth.html")
 
-@api.route("/callback", methods=["GET"])
+
+@api.route("/callback", methods=["GET", "POST"])
 def callback():
-    code = request.args.get("code")
-    if not code:
-        return jsonify({"error": "Missing authorization code"}), 400
 
+    if request.method == "POST":
+        verification_code = request.form.get("verification_code")
+        # print(verification_code)
+        if not verification_code:
+            return jsonify({"error": "Missing verification code"}), 400
+
+        # Write the verification code to StringIO
+        sys.stdin = StringIO(verification_code)
+
+        # TODO middleware to save the token
+        # Redirect to home or any other page
     query = YahooFantasySportsQuery(
         league_id="<YAHOO_LEAGUE_ID>",
         game_code="nfl",
         game_id=449,
         yahoo_consumer_key=os.getenv("YAHOO_CLIENT_ID"),
         yahoo_consumer_secret=os.getenv("YAHOO_CLIENT_SECRET"),
-        env_file_location=Path(""),
     )
-
-    
+    # save query._yahoo_access_token_dict to database
+    curr_user_guid = query.get_current_user()._extracted_data["guid"]
+    query._yahoo_access_token_dict["guid"] = curr_user_guid
+    print(query._yahoo_access_token_dict)
+    save_access_token(query._yahoo_access_token_dict)
+    print("getting token:\n", get_access_token())
 
     return redirect(url_for("main.home"))
 
 
 @main.route("/home", methods=["GET", "POST"])
 def home():
+    yahoo_access_token = g.access_token
+    if not yahoo_access_token:
+        return redirect(url_for("api.auth"))
     query = YahooFantasySportsQuery(
         league_id="<YAHOO_LEAGUE_ID>",
         game_code="nfl",
         game_id=449,
-        yahoo_consumer_key=os.getenv("YAHOO_CLIENT_ID"),
-        yahoo_consumer_secret=os.getenv("YAHOO_CLIENT_SECRET"),
-        env_file_location=Path(""),
+        yahoo_access_token_json=yahoo_access_token,
     )
+
     curr_user_team = query.get_current_user()._extracted_data["guid"]
     leagues = query.get_user_leagues_by_game_key(449)
 
@@ -93,9 +122,7 @@ def home():
             league_id=selected_league_id,
             game_code="nfl",
             game_id=449,
-            yahoo_consumer_key=os.getenv("YAHOO_CLIENT_ID"),
-            yahoo_consumer_secret=os.getenv("YAHOO_CLIENT_SECRET"),
-            env_file_location=Path(""),
+            yahoo_access_token_json=yahoo_access_token,
         )
 
         player_team_data = []
@@ -135,10 +162,7 @@ def home():
         "home.html",
         leagues=leagues,
     )
-
-    # Access the roster
-
-    # return team_info
+    # return render_template("home.html")
 
 
 def update_ownership():
@@ -186,8 +210,8 @@ def update_ownership():
 def waiver_wire():
     try:
         # Get the current page number and position filter from query parameters
-        page = request.args.get('page', 1, type=int)
-        position_filter = request.args.get('positionFilter', '', type=str)
+        page = request.args.get("page", 1, type=int)
+        position_filter = request.args.get("positionFilter", "", type=str)
         per_page = 25  # Number of players per page
 
         # Get connection from the pool
@@ -199,7 +223,7 @@ def waiver_wire():
             cursor.execute(
                 'SELECT "Player", "Pos", "Rankbypos" FROM "seasonstats" '
                 'WHERE "fantasy_owner" IS NULL AND "Pos" = %s',
-                (position_filter,)
+                (position_filter,),
             )
         else:
             cursor.execute(
@@ -236,7 +260,7 @@ def waiver_wire():
             waiver_wire_players=paginated_players,
             page=page,
             total_pages=total_pages,
-            position_filter=position_filter
+            position_filter=position_filter,
         )
 
     except Exception as error:
@@ -311,7 +335,7 @@ def calculate_consistency(player):
     return total_points, grade
 
 
-@main.route('/team-analyzer', methods=['GET', 'POST'])
+@main.route("/team-analyzer", methods=["GET", "POST"])
 def team_analyzer():
     try:
         connection = get_connection()
@@ -320,42 +344,52 @@ def team_analyzer():
         all_teams = cursor.fetchall()
         cursor.close()
         release_connection(connection)
-        
+
         teams = [team[0] for team in all_teams if team[0] is not None]
         selected_team = None
         players = []
 
-        if request.method == 'POST':
-            selected_team = request.form.get('team')
+        if request.method == "POST":
+            selected_team = request.form.get("team")
             connection = get_connection()
             cursor = connection.cursor()
-            cursor.execute('SELECT "Player", "Pos", "Rankbypos", "WK1Pts", "WK2Pts", "WK3Pts", "WK4Pts", "WK5Pts", "WK6Pts" FROM "seasonstats" WHERE "fantasy_owner" = %s', (selected_team,))
+            cursor.execute(
+                'SELECT "Player", "Pos", "Rankbypos", "WK1Pts", "WK2Pts", "WK3Pts", "WK4Pts", "WK5Pts", "WK6Pts" FROM "seasonstats" WHERE "fantasy_owner" = %s',
+                (selected_team,),
+            )
             team_players = cursor.fetchall()
             cursor.close()
             release_connection(connection)
-            
+
             for player in team_players:
                 player_data = {
-                    'Player': player[0],
-                    'Pos': player[1],
-                    'Rankbypos': player[2],
-                    'WK1Pts': player[3],
-                    'WK2Pts': player[4],
-                    'WK3Pts': player[5],
-                    'WK4Pts': player[6],
-                    'WK5Pts': player[7],
-                    'WK6Pts': player[8],
+                    "Player": player[0],
+                    "Pos": player[1],
+                    "Rankbypos": player[2],
+                    "WK1Pts": player[3],
+                    "WK2Pts": player[4],
+                    "WK3Pts": player[5],
+                    "WK4Pts": player[6],
+                    "WK5Pts": player[7],
+                    "WK6Pts": player[8],
                 }
-                player_data['grade'] = analyze_player(player_data)
+                player_data["grade"] = analyze_player(player_data)
                 total_points, std_dev = calculate_consistency(player_data)
-                player_data['total_points'] = total_points if total_points is not None else "N/A"
-                player_data['std_dev'] = std_dev if std_dev is not None else "N/A"
+                player_data["total_points"] = (
+                    total_points if total_points is not None else "N/A"
+                )
+                player_data["std_dev"] = std_dev if std_dev is not None else "N/A"
                 players.append(player_data)
 
-        return render_template('team_analyzer.html', teams=teams, selected_team=selected_team, players=players)
+        return render_template(
+            "team_analyzer.html",
+            teams=teams,
+            selected_team=selected_team,
+            players=players,
+        )
     except Exception as e:
         print(f"Error fetching team analyzer data: {e}")
-        return render_template('error.html', error_message=str(e))
+        return render_template("error.html", error_message=str(e))
 
 
 @main.route("/trade-builder", methods=["GET", "POST"])
@@ -403,8 +437,7 @@ def trade_builder():
         if request.form.get("your_player") and request.form.get("target_player"):
             your_player = request.form.get("your_player")
             target_player = request.form.get("target_player")
-            trade_feedback = f'You proposed trading {your_player} for {target_player}.'
-
+            trade_feedback = f"You proposed trading {your_player} for {target_player}."
 
     return render_template(
         "trade_builder.html",
@@ -415,7 +448,7 @@ def trade_builder():
     )
 
 
-# 
+#
 #
 #
 #
