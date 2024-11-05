@@ -1,5 +1,3 @@
-/* styles.css */
-
 /* General Styles */
 body {
     font-family: Arial, sans-serif;
@@ -16,350 +14,240 @@ body {
     background: white;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    text-align: center; /* Center text in container */
+    text-align: center;
 }
 
-header {
-    background-color: #3f51b5; /* Header color */
-    color: white;
-    padding: 20px;
-    text-align: center; /* Center header text */
+h1, h2, h3 {
+    margin: 20px 0;
+    text-align: center;
 }
 
 h1 {
-    margin: 0 0 20px;
-    font-size: 2.5em; /* Larger heading */
+    font-size: 2.5em;
 }
 
 h2 {
-    margin: 20px 0;
-    font-size: 1.8em; /* Subheading size */
-    color: #3f51b5; /* Header color */
+    font-size: 1.8em;
+    color: #3f51b5;
 }
 
 h3 {
+    font-size: 1.5em;
     margin: 10px 0;
-    font-size: 1.5em; /* Smaller subheading size */
 }
 
-footer {
-    text-align: center;
-    margin: 20px 0;
-    font-size: 0.9em; /* Smaller font size for footer */
-    display: none;
-}
-
-/* List Styles */
-.leagues, .waiver-wire {
-    margin: 20px;
-    padding: 20px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.leagues ul {
-    list-style: none;
-    padding: 0;
-}
-
-.leagues li {
-    background: #f9f9f9; /* Light background for list items */
-    margin-bottom: 10px;
-    padding: 10px;
-    border-radius: 5px;
-}
-
-/* Button Styles */
-.button {
-    padding: 10px 15px;
-    text-decoration: none;
+/* Header */
+header {
+    background-color: #007bff;
     color: white;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    font-size: 1em; /* Button text size */
+    padding: 10px 0;
+    text-align: center;
 }
 
-.button.primary {
-    background-color: #1976d2; /* Primary button color */
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    padding: 10px;
+}
+
+.navbar a:hover {
+    background-color: #555;
+}
+
+.user-icon img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+/* Buttons */
+.button, button {
+    display: inline-block;
+    width: calc(33% - 20px); /* Fit three buttons side by side with margin */
+    padding: 10px;
+    margin: 10px;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    background-color: #007bff;
+    transition: background-color 0.3s;
+}
+
+.button:hover, button:hover {
+    background-color: #0056b3;
 }
 
 .button.secondary {
-    background-color: #9c27b0; /* Secondary button color */
+    background-color: #9c27b0;
 }
 
 .button.success {
-    background-color: #4caf50; /* Success button color */
-}
-
-.button:hover {
-    background-color: #0056b3; /* Darker shade on hover for primary button */
+    background-color: #4caf50;
 }
 
 /* Form Styles */
 form {
+    max-width: 400px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     gap: 15px;
-    max-width: 400px;
-    margin: 20px auto; /* Center form */
-    padding: 20px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-label, select {
-    font-size: 16px;
+label {
+    display: block;
+    margin-bottom: 5px;
 }
 
+input[type="email"],
+input[type="password"],
+input[type="text"],
 select {
     width: 100%;
     padding: 10px;
-    border: 1px solid #ccc; /* Light gray border */
-    border-radius: 5px;
-    margin-bottom: 20px; /* Space below select */
-}
-
-/* Table Styles */
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-thead th {
-    background-color: #3f51b5; /* Header background color */
-    color: white; /* Header text color */
-    padding: 10px; /* Padding for table headers */
-    border-bottom: 2px solid #ddd; /* Bottom border for headers */
-}
-
-tbody td {
-    padding: 8px 12px;
-    border-bottom: 1px solid #ddd;
-}
-
-/* Backdrop for fixed background */
-.backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url('path_to_backdrop_image.jpg'); /* Replace with actual image */
-    background-size: cover;
-    background-position: center;
-    z-index: -1;
-}
-
-/* Feedback Text */
-p {
-    text-align: center; /* Center feedback text */
-    font-weight: bold; /* Bold feedback text */
-    color: #333; /* Dark text color */
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    margin-bottom: 10px;
 }
 
 /* Responsive Design */
 @media (max-width: 600px) {
     h1 {
-        font-size: 2em; /* Smaller heading on mobile */
+        font-size: 2em;
     }
 
     h2 {
-        font-size: 1.5em; /* Smaller subheading on mobile */
+        font-size: 1.5em;
     }
 
     form {
-        width: 90%; /* Wider form on small screens */
+        width: 90%;
     }
 
     .button {
-        font-size: 0.9em; /* Smaller buttons on mobile */
+        width: 100%; /* Make buttons full width on small screens */
+        font-size: 0.9em;
     }
-    .container{
+
+    .container {
         max-width: 100%;
         padding: 10px;
     }
 }
 
-/* app/static/styles.css */
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    color: #333;
-    margin: 0;
-    padding: 0;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 50px auto;
-    padding: 20px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    text-align: center; /* Center text in container */
-}
-
-header {
-    background-color: #333;
-    color: white;
-    padding: 10px 0;
-}
-
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.navbar a {
-    color: white;
-    text-decoration: none;
-    padding: 10px;
-}
-
-.navbar a:hover {
-    background-color: #555;
-}
-
-.user-icon img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-}
-
-h1 {
-    margin-bottom: 20px;
-}
-
-.leagues {
-    text-align: left;
-}
-
-.leagues h2 {
-    margin-bottom: 20px;
-}
-
-.leagues ul {
-    list-style: none;
-    padding: 0;
-}
-
-.leagues li {
-    background: #f9f9f9;
-    margin-bottom: 10px;
-    padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.leagues h3 {
-    margin: 0 0 5px 0;
-}
-
+/* Footer */
 footer {
-    background-color: #333;
+    background-color: #007bff;
     color: white;
     text-align: center;
     padding: 10px 0;
     position: fixed;
     width: 100%;
     bottom: 0;
-    display: none;
 }
 
+/* Feedback Text */
+p {
+    text-align: center;
+    font-weight: bold;
+}
 
-/* app/static/styles.css */
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    color: #333;
-    margin: 0;
-    padding: 0;
-}
-.container {
-    max-width: 1200px;
-    margin: 50px auto;
-    padding: 20px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    text-align: center;
-}
-header {
-    background-color: #333;
-    color: white;
-    padding: 10px 0;
-}
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 800px;
-    margin: 0 auto;
-}
-.navbar a {
-    color: white;
-    text-decoration: none;
-    padding: 10px;
-}
-.navbar a:hover {
-    background-color: #555;
-}
-.user-icon img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-}
-h1 {
-    margin-bottom: 20px;
-}
-.leagues {
-    text-align: left;
-}
-.leagues h2 {
-    margin-bottom: 20px;
-}
-.leagues ul {
-    list-style: none;
-    padding: 0;
-}
-.leagues li {
-    background: #f9f9f9;
-    margin-bottom: 10px;
-    padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-.leagues h3 {
-    margin: 0 0 5px 0;
-}
-footer {
-    background-color: #333;
-    color: white;
-    text-align: center;
-    padding: 10px 0;
-    position: fixed;
-    width: 100%;
-    bottom: 0;
-    display: none;
-}
+/* Table Styles */
 .table-responsive {
     overflow-x: auto;
 }
+
 table {
     width: 100%;
     border-collapse: collapse;
 }
+
 th, td {
     padding: 8px 12px;
     border: 1px solid #ddd;
     text-align: left;
 }
-th {
-    background-color: #f4f4f4;
+
+thead th {
+    background-color: #3f51b5;
+    color: white;
+    border-bottom: 2px solid #ddd;
+}
+
+
+/* General Form Styles */
+form {
+    max-width: 400px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%; /* Ensure form width adapts to its parent */
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input[type="email"],
+input[type="password"],
+input[type="text"],
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    margin-bottom: 10px;
+    box-sizing: border-box; /* Prevent input overflow */
+}
+
+button {
+    width: 100%; /* Ensure button fits within the form */
+    padding: 10px;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    form {
+        width: 90%; /* Reduce width slightly for small screens */
+        padding: 15px;
+    }
+
+    input[type="email"],
+    input[type="password"],
+    button {
+        font-size: 1em; /* Ensure readability on smaller devices */
+    }
 }

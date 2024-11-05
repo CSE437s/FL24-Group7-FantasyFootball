@@ -12,7 +12,12 @@ from app.db import (
     get_connection,
     release_connection,
     save_access_token,
-    get_access_token,
+    get_access_token_by_guid,
+    create_user,
+    get_user_by_email,
+    get_user_by_id,
+    verify_password,
+    update_user_guid,  # Import the new function
 )
 import numpy as np
 from dotenv import load_dotenv
@@ -52,48 +57,106 @@ def extract_serializable_data(obj):
         return str(obj)  # Convert to string as a last resort
 
 
-@api.route("/auth", methods=["GET", "POST"])
-def auth():
-    redirect_uri = os.getenv("REDIRECT_URI")
-    client_id = os.getenv("YAHOO_CLIENT_ID")
-    client_secret = os.getenv("YAHOO_CLIENT_SECRET")
-    response_type = "code"
-    print("hellothere")
-    webbrowser.open_new_tab(
-        f"https://api.login.yahoo.com/oauth2/request_auth?client_id={client_id}&client_secret={client_secret}&redirect_uri={redirect_uri}&response_type={response_type}"
-    )
-    print("opened new browser tab")
-    return render_template("auth.html")
+@main.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+        if not email or not password:
+            return jsonify({"error": "Missing email or password"}), 400
+
+        user = get_user_by_email(email)
+        if user:
+            # If the email exists, check if the password matches
+            if verify_password(user["password"], password):
+                # If the password matches, treat it as a login
+                session["user_id"] = user["id"]
+                return redirect(url_for("main.home"))
+            else:
+                return (
+                    jsonify({"error": "User already exists with a different password"}),
+                    400,
+                )
+
+        create_user(email, password)
+        user = get_user_by_email(email)  # Retrieve the newly created user
+        session["user_id"] = user["id"]
+        return redirect(url_for("api.oauth"))
+
+    return render_template("register.html")
+
+
+@main.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+        if not email or not password:
+            return jsonify({"error": "Missing email or password"}), 400
+
+        user = get_user_by_email(email)
+        if not user or not verify_password(user["password"], password):
+            return jsonify({"error": "Invalid email or password"}), 400
+
+        session["user_id"] = user["id"]
+        return redirect(url_for("main.home"))
+
+    return render_template("login.html")
+
+
+@api.route("/oauth", methods=["GET", "POST"])
+def oauth():
+    user_id = session.get("user_id")
+    print(user_id)
+    if not user_id:
+        return redirect(url_for("main.login"))
+
+    user = get_user_by_id(user_id)
+    if not user:
+        return redirect(url_for("main.login"))
+
+    access_token = get_access_token_by_guid(user["guid"])
+    if access_token:
+        g.access_token = access_token
+        return redirect(url_for("main.home"))
+    else:
+        REDIRECT_URI = url_for("api.callback", _external=True)
+        CLIENT_ID = os.getenv("YAHOO_CLIENT_ID")
+        CLIENT_SECRET = os.getenv("YAHOO_CLIENT_SECRET")
+        RESPONSE_TYPE = "code"
+        auth_url = f"https://api.login.yahoo.com/oauth2/request_auth?client_id={CLIENT_ID}&client_secret={CLIENT_SECRET}&redirect_uri={REDIRECT_URI}&response_type={RESPONSE_TYPE}"
+        webbrowser.open_new_tab(auth_url)
+        return render_template("auth.html")
 
 
 @api.route("/callback", methods=["GET", "POST"])
 def callback():
-
+    user_id = g.user_id
+    user = get_user_by_id(user_id)
     if request.method == "POST":
         verification_code = request.form.get("verification_code")
-        # print(verification_code)
         if not verification_code:
             return jsonify({"error": "Missing verification code"}), 400
 
-        # Write the verification code to StringIO
         sys.stdin = StringIO(verification_code)
 
-        # TODO middleware to save the token
-        # Redirect to home or any other page
     query = YahooFantasySportsQuery(
         league_id="<YAHOO_LEAGUE_ID>",
         game_code="nfl",
         game_id=449,
         yahoo_consumer_key=os.getenv("YAHOO_CLIENT_ID"),
         yahoo_consumer_secret=os.getenv("YAHOO_CLIENT_SECRET"),
+        env_file_location=Path(""),
     )
-    # save query._yahoo_access_token_dict to database
-    curr_user_guid = query.get_current_user()._extracted_data["guid"]
-    query._yahoo_access_token_dict["guid"] = curr_user_guid
-    print(query._yahoo_access_token_dict)
-    save_access_token(query._yahoo_access_token_dict)
-    print("getting token:\n", get_access_token())
 
+    curr_user_guid = query.get_current_user()._extracted_data["guid"]
+    yahoo_access_token = query._yahoo_access_token_dict
+    yahoo_access_token["guid"] = curr_user_guid
+    save_access_token(yahoo_access_token)
+
+    # Update the user's GUID in the users table if it is currently null
+    update_user_guid(user_id, curr_user_guid)
+    session["curr_user"] = curr_user_guid
     return redirect(url_for("main.home"))
 
 
@@ -101,15 +164,11 @@ def callback():
 def home():
     yahoo_access_token = g.access_token
     if not yahoo_access_token:
-        return redirect(url_for("api.auth"))
-    query = YahooFantasySportsQuery(
-        league_id="<YAHOO_LEAGUE_ID>",
-        game_code="nfl",
-        game_id=449,
-        yahoo_access_token_json=yahoo_access_token,
-    )
+        return redirect(url_for("api.oauth"))
 
-    curr_user_team = query.get_current_user()._extracted_data["guid"]
+    user_id = g.user_id
+    user = get_user_by_id(user_id)
+    user_guid = user["guid"]
     leagues = query.get_user_leagues_by_game_key(449)
 
     for league in leagues:
@@ -118,6 +177,7 @@ def home():
 
     if request.method == "POST":
         selected_league_id = request.form.get("league_id")
+        session["selected_league_id"] = selected_league_id
         query = YahooFantasySportsQuery(
             league_id=selected_league_id,
             game_code="nfl",
@@ -125,44 +185,24 @@ def home():
             yahoo_access_token_json=yahoo_access_token,
         )
 
-        player_team_data = []
         league_teams = query.get_league_teams()
-        rosters = []
-        player_team_data = []
         for team in league_teams:
-            team_info = query.get_team_info(team.team_id)._extracted_data
-            team_roster = team_info["roster"]
-            for player in team_roster.players:
-                player_name = player.name.full
-                player_team_data.append(
-                    {
-                        "player_name": player_name,
-                        "team_name": team_info["name"],
-                    }
-                )
+            if isinstance(team.name, bytes):
+                team.name = team.name.decode("utf-8")
+            if team.is_owned_by_current_login == 1:
+                curr_user_team = [team.team_id]
 
-        df = pd.DataFrame(player_team_data)
+        team_info = query.get_team_info(curr_user_team[0])._extracted_data
 
-        if not os.path.exists("data"):
-            os.makedirs("data")
+        serializable_team_info = extract_serializable_data(team_info)
+        team_name = team_info["name"]
+        team_roster = team_info["roster"]
 
-        # Save the DataFrame to CSV
-        df.to_csv("data/player_team_data.csv", index=False)
+        session["user_team"] = {"team_name": team_name, "team_roster": team_roster}
 
-        update_ownership()
+        return jsonify(serializable_team_info)
 
-        # Pass team name and players to the template
-        return render_template(
-            "home.html",
-            leagues=leagues,
-            player_and_teams_loaded=True,
-        )
-
-    return render_template(
-        "home.html",
-        leagues=leagues,
-    )
-    # return render_template("home.html")
+    return render_template("home.html", leagues=leagues)
 
 
 def update_ownership():
@@ -446,9 +486,3 @@ def trade_builder():
         team2_roster=team2_roster,
         trade_feedback=trade_feedback,
     )
-
-
-#
-#
-#
-#
