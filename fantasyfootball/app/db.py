@@ -9,18 +9,20 @@ load_dotenv(override=True)
 # Define your connection pool globally
 try:
     postgreSQL_pool = psycopg2.pool.SimpleConnectionPool(
-        1, 20,
+        1,
+        20,
         user="postgres",
         password=os.getenv("POSTGRES_PASSWORD"),
         host="localhost",
         port="5432",
-        database="fantasy_football_db"
+        database="fantasy_football_db",
     )
     if postgreSQL_pool:
         print("Connection pool created successfully")
 
 except (Exception, psycopg2.DatabaseError) as error:
     print("Error while connecting to PostgreSQL", error)
+
 
 def get_connection():
     """
@@ -31,6 +33,7 @@ def get_connection():
     """
     return postgreSQL_pool.getconn()
 
+
 def release_connection(connection):
     """
     Release a connection back to the PostgreSQL connection pool.
@@ -39,6 +42,36 @@ def release_connection(connection):
         connection: The connection object to be released.
     """
     postgreSQL_pool.putconn(connection)
+
+
+def table_exists(table_name):
+    """
+    Check if a table exists in the database.
+
+    Args:
+        table_name: The name of the table to check.
+
+    Returns:
+        bool: True if the table exists, False otherwise.
+    """
+    conn = get_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_name = %s
+                );
+                """,
+                (table_name,),
+            )
+            return cursor.fetchone()[0]
+    except Exception as e:
+        raise e
+    finally:
+        release_connection(conn)
+
 
 def create_access_tokens_table():
     """
@@ -82,6 +115,7 @@ def create_access_tokens_table():
     finally:
         release_connection(conn)
 
+
 def create_users_table():
     """
     Create the users table in the database if it does not already exist.
@@ -114,6 +148,7 @@ def create_users_table():
     finally:
         release_connection(conn)
 
+
 def create_user(email, password):
     """
     Create a new user in the users table with the provided email and password.
@@ -123,6 +158,8 @@ def create_user(email, password):
         email: The email address of the user.
         password: The plaintext password of the user.
     """
+    if not table_exists('users'):
+        create_users_table()
     conn = get_connection()
     try:
         with conn.cursor() as cursor:
@@ -132,7 +169,7 @@ def create_user(email, password):
                 INSERT INTO users (email, password)
                 VALUES (%s, %s)
                 """,
-                (email, hashed_password)
+                (email, hashed_password),
             )
         conn.commit()
     except Exception as e:
@@ -140,6 +177,7 @@ def create_user(email, password):
         raise e
     finally:
         release_connection(conn)
+
 
 def get_user_by_email(email):
     """
@@ -151,6 +189,8 @@ def get_user_by_email(email):
     Returns:
         dict: A dictionary containing the user's information, or None if the user is not found.
     """
+    if not table_exists('users'):
+        create_users_table()
     conn = get_connection()
     try:
         with conn.cursor(cursor_factory=extras.DictCursor) as cursor:
@@ -158,13 +198,14 @@ def get_user_by_email(email):
                 """
                 SELECT * FROM users WHERE email = %s
                 """,
-                (email,)
+                (email,),
             )
             return cursor.fetchone()
     except Exception as e:
         raise e
     finally:
         release_connection(conn)
+
 
 def get_user_by_id(user_id):
     """
@@ -176,6 +217,8 @@ def get_user_by_id(user_id):
     Returns:
         dict: A dictionary containing the user's information, or None if the user is not found.
     """
+    if not table_exists('users'):
+        create_users_table()
     conn = get_connection()
     try:
         with conn.cursor(cursor_factory=extras.DictCursor) as cursor:
@@ -183,13 +226,17 @@ def get_user_by_id(user_id):
                 """
                 SELECT * FROM users WHERE id = %s
                 """,
-                (user_id,)
+                (user_id,),
             )
-            return cursor.fetchone()
+            user = cursor.fetchone()
+            if user is None:
+                print(f"No user found with id {user_id}")
+            return user
     except Exception as e:
         raise e
     finally:
         release_connection(conn)
+
 
 def verify_password(stored_password, provided_password):
     """
@@ -204,6 +251,7 @@ def verify_password(stored_password, provided_password):
     """
     return check_password_hash(stored_password, provided_password)
 
+
 def save_access_token(token_dict):
     """
     Save an access token and related information to the access_tokens table.
@@ -212,6 +260,8 @@ def save_access_token(token_dict):
     Args:
         token_dict: A dictionary containing the access token information.
     """
+    if not table_exists('access_tokens'):
+        create_access_tokens_table()
     conn = get_connection()
     try:
         with conn.cursor() as cursor:
@@ -230,14 +280,14 @@ def save_access_token(token_dict):
                     created_at = CURRENT_TIMESTAMP
                 """,
                 (
-                    token_dict['access_token'],
-                    token_dict['consumer_key'],
-                    token_dict['consumer_secret'],
-                    token_dict['guid'],
-                    token_dict['refresh_token'],
-                    token_dict['token_time'],
-                    token_dict['token_type']
-                )
+                    token_dict["access_token"],
+                    token_dict["consumer_key"],
+                    token_dict["consumer_secret"],
+                    token_dict["guid"],
+                    token_dict["refresh_token"],
+                    token_dict["token_time"],
+                    token_dict["token_type"],
+                ),
             )
         conn.commit()
     except Exception as e:
@@ -245,6 +295,7 @@ def save_access_token(token_dict):
         raise e
     finally:
         release_connection(conn)
+
 
 def get_access_token_by_guid(guid):
     """
@@ -256,6 +307,8 @@ def get_access_token_by_guid(guid):
     Returns:
         dict: A dictionary containing the access token information, or None if the token is not found.
     """
+    if not table_exists('access_tokens'):
+        create_access_tokens_table()
     conn = get_connection()
     try:
         with conn.cursor(cursor_factory=extras.DictCursor) as cursor:
@@ -267,7 +320,7 @@ def get_access_token_by_guid(guid):
                 ORDER BY id DESC
                 LIMIT 1
                 """,
-                (guid,)
+                (guid,),
             )
             result = cursor.fetchone()
             if result:
@@ -278,14 +331,17 @@ def get_access_token_by_guid(guid):
     finally:
         release_connection(conn)
 
-def update_user_guid(user_id, guid):
+
+def update_user_guid(user_id, new_guid):
     """
-    Update the user's GUID in the users table if it is currently null.
+    Update the user's GUID in the users table if it is currently null or different.
 
     Args:
         user_id: The ID of the user.
-        guid: The GUID to be set for the user.
+        new_guid: The new GUID to be set for the user.
     """
+    if not table_exists('users'):
+        create_users_table()
     conn = get_connection()
     try:
         with conn.cursor() as cursor:
@@ -293,9 +349,9 @@ def update_user_guid(user_id, guid):
                 """
                 UPDATE users
                 SET guid = %s
-                WHERE id = %s AND guid IS NULL
+                WHERE id = %s AND (guid IS NULL OR guid != %s)
                 """,
-                (guid, user_id)
+                (new_guid, user_id, new_guid),
             )
         conn.commit()
     except Exception as e:
@@ -303,4 +359,3 @@ def update_user_guid(user_id, guid):
         raise e
     finally:
         release_connection(conn)
-

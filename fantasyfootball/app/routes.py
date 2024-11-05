@@ -103,18 +103,23 @@ def login():
 
     return render_template("login.html")
 
+@main.route("/logout")
+def logout():
+    session.clear()
+    return redirect("https://login.yahoo.com/config/login?logout=1&.direct=1")
 
 @api.route("/oauth", methods=["GET", "POST"])
 def oauth():
+    print("oauth")
     user_id = session.get("user_id")
-    print(user_id)
     if not user_id:
         return redirect(url_for("main.login"))
+    print("user_id: ",user_id)
 
     user = get_user_by_id(user_id)
     if not user:
         return redirect(url_for("main.login"))
-
+    print("user: ",user)
     access_token = get_access_token_by_guid(user["guid"])
     if access_token:
         g.access_token = access_token
@@ -131,8 +136,14 @@ def oauth():
 
 @api.route("/callback", methods=["GET", "POST"])
 def callback():
+    print("callback")
     user_id = g.user_id
+    print("user_id: ",user_id)
     user = get_user_by_id(user_id)
+    if not user:
+        return redirect(url_for("main.login"))
+    print("user: ",user)
+
     if request.method == "POST":
         verification_code = request.form.get("verification_code")
         if not verification_code:
@@ -153,16 +164,18 @@ def callback():
     yahoo_access_token = query._yahoo_access_token_dict
     yahoo_access_token["guid"] = curr_user_guid
     save_access_token(yahoo_access_token)
-
+    print(yahoo_access_token)
     # Update the user's GUID in the users table if it is currently null
     update_user_guid(user_id, curr_user_guid)
-    session["curr_user"] = curr_user_guid
+    session["curr_user_guid"] = curr_user_guid
+    print("user by id",get_user_by_id(user_id))
     return redirect(url_for("main.home"))
 
 
 @main.route("/home", methods=["GET", "POST"])
 def home():
     yahoo_access_token = g.access_token
+    print("home",yahoo_access_token)
     if not yahoo_access_token:
         return redirect(url_for("api.oauth"))
 
