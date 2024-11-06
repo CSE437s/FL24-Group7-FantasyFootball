@@ -26,10 +26,10 @@
                 <tr>
                     <th>Player</th>
                     <th>Position</th>
-                    <th>PPG</th>
+                    <!-- <th>PPG</th>
                     <th>Total Points</th>
                     <th>Consistency Grade</th>
-                    <th>Ovr Grade</th>
+                    <th>Ovr Grade</th> -->
                 </tr>
             </thead>
             <tbody>
@@ -51,21 +51,21 @@
                         </a>
                     </td>
                     <td>{{ player.Pos }}</td>
-                    <td>{{ player.ppg }}</td>
+                    <!-- <td>{{ player.ppg }}</td>
                     <td>{{ player.total_points }}</td>
                     <td>{{ player.std_dev }}</td>
-                    <td>{{ player.grade }}</td>
+                    <td>{{ player.grade }}</td> -->
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
     <div class="position-scores">
-        <h2>Greatest strength:</h2>
+        <!-- <h2>Greatest strength:</h2>
         <h3>Wide Receivers </h3>
 
         <h2>Greatest weakness:</h2>
-        <h3>Running Backs </h3>
+        <h3>Running Backs </h3> -->
     </div>
 
 
@@ -139,7 +139,7 @@
             document.getElementById("playerTeam").innerText = playerTeam;
             document.getElementById("byeWeek").innerText = playerBye;
             document.getElementById("playerRanking").innerText = playerRanking;
-            document.getElementById("injury").innerText = playerStatus + ": " + playerInjury;
+            document.getElementById("injury").innerText =  playerInjury;
 
             // Display the modal
             $('#playerDashboard').show();

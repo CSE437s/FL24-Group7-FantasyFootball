@@ -37,7 +37,7 @@ def extract_serializable_data(obj):
 
 @api.route("/auth", methods=["GET"])
 def auth():
-    
+
     redirect_uri = os.getenv("REDIRECT_URI")
     client_id = os.getenv("YAHOO_CLIENT_ID")
     client_secret = os.getenv("YAHOO_CLIENT_SECRET")
@@ -84,7 +84,7 @@ def home():
     for league in leagues:
         if isinstance(league.name, bytes):
             league.name = league.name.decode("utf-8")
-            
+
 
     if request.method == "POST":
         selected_league_id = request.form.get("league_id")
@@ -96,7 +96,7 @@ def home():
             yahoo_consumer_secret=os.getenv("YAHOO_CLIENT_SECRET"),
             env_file_location=Path(""),
         )
-    
+
         player_team_data = []
         league_teams = query.get_league_teams()
         player_names = set()
@@ -122,7 +122,7 @@ def home():
                         "previous_performance": player_stats.player_points.total,
                         "games_played": player_stats.player_stats.stats[0].value,
                         "total_points": player_stats.player_points.total,
-                        "ppg": (player_stats.player_points.total / player_stats.player_stats.stats[0].value 
+                        "ppg": (player_stats.player_points.total / player_stats.player_stats.stats[0].value
                                 if player_stats.player_stats.stats[0].value != 0 else 0)
 
                     }
@@ -167,7 +167,7 @@ def home():
         #         }
         #     )
 
-        
+
 
         # Mahomes
         # stat ID 4 - passing yds
@@ -212,17 +212,17 @@ def home():
         #         for stat in stat_list:
 
         #             stat = stat._extracted_data
-                    
+
         #             stat_name = stat.name
         #             stat_value = stat.value
 
         #             if stat_name and stat_value is not None:
-                        
+
         #                 player_info[stat_name] = stat_value
         #             else:
         #                 print(f"Stat data missing for player: {player.name.full}, stat: {stat_name}")
 
-            
+
             # player_team_data.append(player_info)
 
         # # Create the DataFrame
@@ -250,7 +250,6 @@ def home():
         "home.html",
         leagues=leagues,
     )
-
 
 
 @main.route("/waiver-wire")
@@ -420,7 +419,7 @@ def team_analyzer():
         all_teams = cursor.fetchall()
         cursor.close()
         release_connection(connection)
-        
+
         teams = [team[0] for team in all_teams if team[0] is not None]
         selected_team = None
         players = []
@@ -433,7 +432,7 @@ def team_analyzer():
             team_players = cursor.fetchall()
             cursor.close()
             release_connection(connection)
-            
+
             for player in team_players:
                 player_data = {
                     'Player': player[0],
@@ -501,7 +500,7 @@ def trade_builder():
                 'SELECT "player_name", "primary_position", "image", "previous_performance", "team_name", "bye", "status", "injury", "player_key", "previous_week", "ppg", "total_points", "team_abb" FROM "player_data" WHERE "team_name" = %s',
                 (team1,),
             )
-            team1_roster = cursor.fetchall()            
+            team1_roster = cursor.fetchall()
 
             # Fetch team 2 roster
             cursor.execute(
@@ -519,13 +518,15 @@ def trade_builder():
                     'Pos': player[1],
                     'img': player[2],
                     'previous_performance': player[3],
-                    'bye': player[4],
-                    'status': player[5],
-                    'injury': player[6],
-                    'previous_week': player[7],
-                    'ppg': player[8],
-                    'total_points': player[9],
-                    'team_abb': player[10]
+                    'team_name': player[4],
+                    'bye': player[5],
+                    'status': player[6],
+                    'injury': player[7],
+                    'player_key': player[8],
+                    'previous_week': player[9],
+                    'ppg': player[10],
+                    'total_points': player[11],
+                    'team_abb': player[12]
                 }
                 team1_roster_info.append(team1_info)
 
@@ -536,13 +537,15 @@ def trade_builder():
                     'Pos': player[1],
                     'img': player[2],
                     'previous_performance': player[3],
-                    'bye': player[4],
-                    'status': player[5],
-                    'injury': player[6],
-                    'previous_week': player[7],
-                    'ppg': player[8],
-                    'total_points': player[9],
-                    'team_abb': player[10]
+                    'team_name': player[4],
+                    'bye': player[5],
+                    'status': player[6],
+                    'injury': player[7],
+                    'player_key': player[8],
+                    'previous_week': player[9],
+                    'ppg': player[10],
+                    'total_points': player[11],
+                    'team_abb': player[12]
                 }
                 team2_roster_info.append(team2_info)
 

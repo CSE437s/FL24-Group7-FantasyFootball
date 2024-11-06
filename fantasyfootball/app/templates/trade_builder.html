@@ -33,26 +33,20 @@
             <div id="your_players_container">
                 <div class="player-select">
                     <div class="player-info-container">
-                        <select name="your_players" class="your_players" onchange="showInfoIcon(this)">
+                        <select name="your_players" class="your_players">
                             {% for player in team1_roster %}
-                                <option value="{{ player[0] }}">{{ player.Player }} ({{ player.Pos }} - {{ player.team_abb }})</option>
-                            <a href="#" class="info-icon" 
-                            data-player-name="{{ player.Player }}" 
-                            data-player-pos="{{ player.Pos }}"
-                            data-player-headshot="{{ player.img }}" 
-                            data-player-bye="{{ player.bye }}" 
-                            data-player-ranking="{{ player.previous_performance }}" 
-                            data-player-status="{{ player.status }}" 
-                            data-player-injury="{{ player.injury }}" 
-                            data-player-team="{{ player.team_abb }}"
-                            style="margin-left: 5px;">
-                                <i class="fas fa-info-circle"></i> <!-- Font Awesome info icon -->
-                            </a>
-                        
-                        {% endfor %}
-                    </select>
-        
-                        <a href="#" class="info-icon" data-player-name="" style="margin-left: 5px; display: none;">
+                                <option value="{{ player[0] }}"
+                                data-player-name="{{ player.Player }}" 
+                                data-player-pos="{{ player.Pos }}"
+                                data-player-headshot="{{ player.img }}" 
+                                data-player-bye="{{ player.bye }}" 
+                                data-player-ranking="{{ player.previous_performance }}" 
+                                data-player-status="{{ player.status }}" 
+                                data-player-injury="{{ player.injury }}" 
+                                data-player-team="{{ player.team_abb }}" >{{ player.Player }} ({{ player.Pos }})</option>
+                            {% endfor %}
+                        </select>
+                        <a href="#" class="info-icon" style="margin-left: 5px;">
                             <i class="fas fa-info-circle"></i>
                         </a>
                     </div>
@@ -67,10 +61,9 @@
             <div id="target_players_container">
                 <div class="player-select">
                     <div class="player-info-container">
-                        <select name="target_players" class="target_players" onchange="showInfoIcon(this)">
+                        <select name="target_players" class="target_players">
                             {% for player in team2_roster %}
-                            <option value="{{ player[0] }}">{{ player.Player }} ({{ player.Pos }} - {{ player.team_abb }})</option>
-                            <a href="#" class="info-icon" 
+                            <option value="{{ player[0] }}"
                             data-player-name="{{ player.Player }}" 
                             data-player-pos="{{ player.Pos }}"
                             data-player-headshot="{{ player.img }}" 
@@ -78,14 +71,14 @@
                             data-player-ranking="{{ player.previous_performance }}" 
                             data-player-status="{{ player.status }}" 
                             data-player-injury="{{ player.injury }}" 
-                            data-player-team="{{ player.team_abb }}"
-                            style="margin-left: 5px;">–
-                                <i class="fas fa-info-circle"></i> <!-- Font Awesome info icon -->
-                            </a>
-                        
-                        {% endfor %}
-                    </select>
-                        </div>
+
+                            data-player-team="{{ player.team_abb }}" >{{ player.Player }} ({{ player.Pos }})</option>
+                            {% endfor %}
+                        </select>
+                        <a href="#" class="info-icon" style="margin-left: 5px;">
+                            <i class="fas fa-info-circle"></i>
+                        </a>
+                    </div>
                     <button type="button" class="removePlayerButton" onclick="removePlayer(this)">Remove Player</button>
                 </div>
             </div>
@@ -115,88 +108,83 @@
 
 <script>
     $(document).ready(function() {
-        // Delegate click events for dynamically added info icons
-        $('.info-icon').on('click', function(event) {
-            event.preventDefault();  // Prevent default link behavior
 
-            // Populate the dashboard with player name and placeholder data
-            const playerName = $(this).data('player-name');
-            const playerPos = $(this).data('player-pos');
-            const playerHeadshot = $(this).data('player-headshot');
-            const playerTeam = $(this).data('player-team');
-            const playerBye = $(this).data('player-bye');
-            const playerRanking = $(this).data('player-ranking');
-            const playerStatus = $(this).data('player-status');
-            const playerInjury = $(this).data('player-injury');
+    // For initial Load
+    function updateInfoIcons() {
+        $('.your_players, .target_players').each(function() {
+            const selectedOption = $(this).find('option:selected');
+            const infoIcon = $(this).siblings('.info-icon');
 
-            // Populate the dashboard with player data
-            document.getElementById("dashboardPlayerName").innerText = playerName;
-            document.getElementById("dashboardPlayerPosition").innerText = playerPos;
-            document.getElementById("playerHeadshot").src = playerHeadshot;
-            document.getElementById("playerTeam").innerText = playerTeam;
-            document.getElementById("byeWeek").innerText = playerBye;
-            document.getElementById("playerRanking").innerText = playerRanking;
-            document.getElementById("injury").innerText = playerStatus + ": " + playerInjury;
+            // Populate the info icon with player data
+            infoIcon.data({
+                playerName: selectedOption.data('player-name'),
+                playerPos: selectedOption.data('player-pos'),
+                playerHeadshot: selectedOption.data('player-headshot'),
+                playerBye: selectedOption.data('player-bye'),
+                playerRanking: selectedOption.data('player-ranking'),
+                playerStatus: selectedOption.data('player-status'),
+                playerInjury: selectedOption.data('player-injury'),
+                playerTeam: selectedOption.data('player-team')
+            });
 
-            // Display the modal
-            $('#playerDashboard').show();
+            // Show the info icon
+            infoIcon.show();
+        });
+    }
+
+    updateInfoIcons();
+
+    // Show info icon when player is selected
+    $('.your_players, .target_players').change(function() {
+        const selectedOption = $(this).find('option:selected');
+        const infoIcon = $(this).siblings('.info-icon');
+
+        // Populate the info icon with player data
+        infoIcon.data({
+            playerName: selectedOption.data('player-name'),
+            playerPos: selectedOption.data('player-pos'),
+            playerHeadshot: selectedOption.data('player-headshot'),
+            playerBye: selectedOption.data('player-bye'),
+            playerRanking: selectedOption.data('player-ranking'),
+            playerStatus: selectedOption.data('player-status'),
+            playerInjury: selectedOption.data('player-injury'),
+            playerTeam: selectedOption.data('player-team')
         });
 
-        // Add player selection dropdowns dynamically for Team 1
-        $('#addYourPlayerButton').on('click', function() {
-            $('#your_players_container').append(`
-                <div class="player-select">
-                    <div class="player-info-container">
-                        <select name="your_players" class="your_players" onchange="showInfoIcon(this)">
-                            {% for player in team1_roster %}
-                                <option value="{{ player[0] }}">{{ player[0] }} ({{ player[1] }} - Rank: {{ player[2] }})</option>
-                            {% endfor %}
-                        </select>
-                        <a href="#" class="info-icon" data-player-name="" style="margin-left: 5px; display: none;">
-                            <i class="fas fa-info-circle"></i>
-                        </a>
-                    </div>
-                    <button type="button" class="removePlayerButton" onclick="removePlayer(this)">Remove Player</button>
-                </div>
-            `);
-        });
-
-        // Add player selection dropdowns dynamically for Team 2
-        $('#addTargetPlayerButton').on('click', function() {
-            $('#target_players_container').append(`
-                <div class="player-select">
-                    <div class="player-info-container">
-                        <select name="target_players" class="target_players" onchange="showInfoIcon(this)">
-                            {% for player in team2_roster %}
-                                <option value="{{ player[0] }}">{{ player[0] }} ({{ player[1] }} - Rank: {{ player[2] }})</option>
-                            {% endfor %}
-                        </select>
-                        <a href="#" class="info-icon" data-player-name="" style="margin-left: 5px; display: none;">
-                            <i class="fas fa-info-circle"></i>
-                        </a>
-                    </div>
-                    <button type="button" class="removePlayerButton" onclick="removePlayer(this)">Remove Player</button>
-                </div>
-            `);
-        });
-
-        // Close the dashboard when the close icon is clicked
-        $('#closeDashboard').on('click', function() {
-            $('#playerDashboard').hide();
-        });
-
-        $(window).on('click', function(event) {
-            if ($(event.target).is('#playerDashboard')) {
-                $('#playerDashboard').hide();
-            }
-        });
+        // Show the info icon
+        infoIcon.show();
     });
 
-    function showInfoIcon(selectElement) {
-        const playerName = selectElement.value;
-        const infoIcon = $(selectElement).siblings('.info-icon');
-        infoIcon.attr("data-player-name", playerName).show();
-    }
+    // Info icon click handler
+    $('.info-icon').on('click', function(event) {
+        event.preventDefault();  // Prevent default link behavior
+        const playerData = $(this).data();
+
+        // Populate the dashboard with player data
+        document.getElementById("dashboardPlayerName").innerText = playerData.playerName;
+        document.getElementById("dashboardPlayerPosition").innerText = playerData.playerPos;
+        document.getElementById("playerHeadshot").src = playerData.playerHeadshot;
+        document.getElementById("playerTeam").innerText = playerData.playerTeam;
+        document.getElementById("byeWeek").innerText = playerData.playerBye;
+        document.getElementById("playerRanking").innerText = playerData.playerRanking;
+        document.getElementById("injury").innerText = playerData.playerInjury;
+
+        // Display the modal
+        $('#playerDashboard').show();
+    });
+
+    // Close the dashboard when the close icon is clicked
+    $('#closeDashboard').on('click', function() {
+        $('#playerDashboard').hide();
+    });
+
+    $(window).on('click', function(event) {
+        if ($(event.target).is('#playerDashboard')) {
+            $('#playerDashboard').hide();
+        }
+    });
+    });
+
 
     function removePlayer(button) {
         $(button).closest('.player-select').remove();
@@ -204,52 +192,53 @@
 
     function confirmTrade() {
         event.preventDefault();
-        var yourPlayers = [];
-        var targetPlayers = [];
+    //     var yourPlayers = [];
+    //     var targetPlayers = [];
 
-        $('select[name="your_players"]').each(function() {
-            yourPlayers.push($(this).val());
-        });
+    //     $('select[name="your_players"]').each(function() {
+    //         yourPlayers.push($(this).val());
+    //     });
 
-        $('select[name="target_players"]').each(function() {
-            targetPlayers.push($(this).val());
-        });
+    //     $('select[name="target_players"]').each(function() {
+    //         targetPlayers.push($(this).val());
+    //     });
 
-        var team1Name = $('input[name="team1"]').val();
-        var team2Name = $('input[name="team2"]').val();
+    //     var team1Name = $('input[name="team1"]').val();
+    //     var team2Name = $('input[name="team2"]').val();
 
-        var message = `
-        <div class="team-section">
-            <h4>${team1Name} trades:</h4>
-            <ul class="player-list">
-                ${yourPlayers.map(player => `<li>${player}</li>`).join('')}
-            </ul>
-        </div>
-        <div class="team-section">
-            <h4>${team2Name} trades:</h4>
-            <ul class="player-list">
-                ${targetPlayers.map(player => `<li>${player}</li>`).join('')}
-            </ul>
-        </div>
-    `;
+    //     var message = `
+    //     <div class="team-section">
+    //         <h4>${team1Name} trades:</h4>
+    //         <ul class="player-list">
+    //             ${yourPlayers.map(player => `<li>${player}</li>`).join('')}
+    //         </ul>
+    //     </div>
+    //     <div class="team-section">
+    //         <h4>${team2Name} trades:</h4>
+    //         <ul class="player-list">
+    //             ${targetPlayers.map(player => `<li>${player}</li>`).join('')}
+    //         </ul>
+    //     </div>
+    // `;
 
-        $('#tradeDetails').html(message);
+    //     $('#tradeDetails').html(message);
+    alert("Trade Confirmed!");
         return true;
     }
 
     function copyTrade() {
-        const tradeDetails = document.getElementById("tradeDetails");
-        if (!tradeDetails || tradeDetails.innerHTML.trim() === "") {
-            alert("There are no trade details to copy.");
-            return;
-        }
+        // const tradeDetails = document.getElementById("tradeDetails");
+        // if (!tradeDetails || tradeDetails.innerHTML.trim() === "") {
+        //     alert("There are no trade details to copy.");
+        //     return;
+        // }
 
-        const tempTextArea = document.createElement("textarea");
-        tempTextArea.value = tradeDetails.innerText;
-        document.body.appendChild(tempTextArea);
-        tempTextArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(tempTextArea);
+        // const tempTextArea = document.createElement("textarea");
+        // tempTextArea.value = tradeDetails.innerText;
+        // document.body.appendChild(tempTextArea);
+        // tempTextArea.select();
+        // document.execCommand("copy");
+        // document.body.removeChild(tempTextArea);
         alert("Trade details copied to clipboard!");
     }
 
@@ -257,5 +246,4 @@
         document.getElementById("tradeDetails").innerHTML = "";
     }
 </script>
-
 {% endblock %}
