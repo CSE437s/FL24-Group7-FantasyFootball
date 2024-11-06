@@ -7,7 +7,7 @@ import json
 import pandas as pd
 import psycopg2
 from psycopg2 import pool
-from app.db import get_connection, release_connection
+from app.db import get_connection, release_connection, upsert_player_data
 import numpy as np
 
 # Define a Blueprint for the API routes
@@ -99,7 +99,6 @@ def home():
 
         player_team_data = []
         league_teams = query.get_league_teams()
-        # all_players = query.get_league_players()
         player_names = set()
         for team in league_teams:
             team_info = query.get_team_info(team.team_id)._extracted_data
@@ -128,6 +127,22 @@ def home():
 
                     }
                 )
+
+        # all_players = query.get_league_players()
+        # waiver_data = []
+        # for player in all_players:
+        #     waiver_data.append({
+        #                 "player_name": player.name.full,
+        #                 "primary_position": player.primary_position,
+        #                 "bye": player.bye,
+        #                 "team_abb": player.editorial_team_abbr,
+        #                 "image": player.image_url,
+        #                 "status": player.status,
+        #                 "injury": player.injury_note,
+        #                 "player_key": player.player_key,
+        #     })
+
+
                 # player_names.add(player.name.full)
 
         # for player in all_players:
@@ -210,16 +225,19 @@ def home():
 
             # player_team_data.append(player_info)
 
-        # Create the DataFrame
-        df = pd.DataFrame(player_team_data)
+        # # Create the DataFrame
+        # df = pd.DataFrame(player_team_data)
+        # # df2 = pd.DataFrame(waiver_data)
 
-        if not os.path.exists("data"):
-            os.makedirs("data")
+        # if not os.path.exists("data"):
+        #     os.makedirs("data")
 
         # Save the DataFrame to CSV
-        df.to_csv("data/player_team_data.csv", index=False)
+        # df.to_csv("data/player_team_data.csv", index=False)
+        # df2.to_csv("data/waiver_data.csv", index=False)
+    
 
-        update_ownership()
+        upsert_player_data(player_team_data)
 
         # Pass team name and players to the template
         return render_template(
@@ -233,88 +251,6 @@ def home():
         leagues=leagues,
     )
 
-    # Access the roster
-
-    # return team_info
-
-
-
-def update_ownership():
-    # Load the CSV file into a DataFrame
-    df = pd.read_csv("data/player_team_data.csv")
-
-    try:
-        # Get the current page number and position filter from query parameters
-        page = request.args.get('page', 1, type=int)
-        position_filter = request.args.get('positionFilter', '', type=str)
-        per_page = "25"
-
-        # Get connection from the pool
-        connection = get_connection()
-        cursor = connection.cursor()
-
-        # Modify SQL query based on position filter
-        if position_filter:
-            print("Executing query with position filter...")
-            cursor.execute(
-                'SELECT player_name, primary_position, image, previous_performance, team_name, bye, status, injury '
-                'FROM player_data '
-                'WHERE primary_position = %s '
-                'LIMIT %s OFFSET %s',
-                (position_filter, per_page, (page - 1) * per_page)
-)
-
-        else:
-            print("Executing query without position filter...")
-            cursor.execute(
-            'SELECT player_name, primary_position, image, previous_performance, team_name, bye, status, injury '
-            'FROM player_data '
-            'LIMIT %s OFFSET %s',
-            (per_page, (page - 1) * per_page)
-        )
-
-        rows = cursor.fetchall()
-
-        # Convert rows to dictionary format
-        waiver_wire_players = [
-            {
-            "player_name": row[0],
-            "primary_position": row[1],
-            "image": row[2],
-            "previous_performance": row[3],
-            "team_name": row[4],
-            "bye": row[5],
-            "status": row[6],
-            "injury": row[7]
-            }
-            for row in rows
-        ]
-
-    # Calculate pagination
-        total = len(waiver_wire_players)
-        total_pages = (total + per_page - 1) // per_page  # Calculate total pages
-        start = (page - 1) * per_page
-        end = start + per_page
-        paginated_players = waiver_wire_players[start:end]
-
-        # Close cursor and release connection
-        cursor.close()
-        release_connection(connection)
-
-        # Render the waiver_wire template with paginated player data and filter info
-        return render_template(
-        "waiver_wire.html",
-        waiver_wire_players=paginated_players,
-        page=page,
-        total_pages=total_pages,
-        position_filter=position_filter
-    )
-
-    except Exception as e:
-        print("An error occurred:", e)
-    return jsonify({"error": "An error occurred while processing the request."}), 500
-
-
 
 @main.route("/waiver-wire")
 def waiver_wire():
@@ -324,23 +260,23 @@ def waiver_wire():
         position_filter = request.args.get('positionFilter', '', type=str)
         per_page = 25  # Number of players per page
 
-         # Get connection from the pool
+        # Get connection from the pool
         connection = get_connection()
         cursor = connection.cursor()
 
         # Modify SQL query based on position filter
         if position_filter:
             cursor.execute(
-                'SELECT player_name, primary_position, image, previous_performance, team_name, bye, status, injury '
-                'FROM player_data '
+                'SELECT player_name, primary_position, bye_week, team_abb, image_url, status, injury, player_key '
+                'FROM waiver_players '
                 'WHERE primary_position = %s '
                 'LIMIT %s OFFSET %s',
                 (position_filter, per_page, (page - 1) * per_page)
             )
         else:
             cursor.execute(
-                'SELECT player_name, primary_position, image, previous_performance, team_name, bye, status, injury '
-                'FROM player_data '
+                'SELECT player_name, primary_position, bye_week, team_abb, image_url, status, injury, player_key '
+                'FROM waiver_players '
                 'LIMIT %s OFFSET %s',
                 (per_page, (page - 1) * per_page)
             )
@@ -352,21 +288,19 @@ def waiver_wire():
             {
                 "player_name": row[0],
                 "primary_position": row[1],
-                "image": row[2],
-                "previous_performance": row[3],
-                "team_name": row[4],
-                "bye": row[5],
-                "status": row[6],
-                "injury": row[7]
+                "bye": row[2],
+                "team_abb": row[3],
+                "image_url": row[4],
+                "status": row[5],
+                "injury": row[6],
+                "player_key": row[7]
             }
             for row in rows
         ]
+
         # Calculate pagination
         total = len(waiver_wire_players)
         total_pages = (total + per_page - 1) // per_page  # Calculate total pages
-        start = (page - 1) * per_page
-        end = start + per_page
-        paginated_players = waiver_wire_players[start:end]
 
         # Close cursor and release connection
         cursor.close()
@@ -375,7 +309,7 @@ def waiver_wire():
         # Render the waiver_wire template with paginated player data and filter info
         return render_template(
             "waiver_wire.html",
-            waiver_wire_players=paginated_players,
+            waiver_wire_players=waiver_wire_players,
             page=page,
             total_pages=total_pages,
             position_filter=position_filter
@@ -384,6 +318,7 @@ def waiver_wire():
     except Exception as error:
         print("Error fetching waiver wire data:", error)
         return "Error loading waiver wire", 500
+
 
 
 def analyze_player(player):

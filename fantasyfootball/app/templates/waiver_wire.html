@@ -14,7 +14,7 @@
         <h2>Top Waiver Picks</h2>
 
         <div class="position-filter mb-3">
-            {% for pos in ["", "QB", "RB", "WR", "TE"] %}
+            {% for pos in ["", "QB", "RB", "WR", "TE", "DEF", "K"] %}
                 <label class="mr-3">
                     <input type="radio" name="positionFilter" value="{{ pos }}" {% if position_filter == pos %}checked{% endif %}>
                     {{ pos if pos else "All" }}
@@ -29,7 +29,6 @@
                     <tr>
                         <th>Name</th>
                         <th>Position</th>
-                        <th>Previous  Performance</th> <!-- Change this to Projected Points -->
                     </tr>
                 </thead>
                 <tbody>
@@ -37,6 +36,7 @@
                     <tr>
                         <td>
                             {{ player.player_name }}
+                          
                             <a href="#" class="info-icon"
                             data-player-name="{{ player.player_name }}"
                             data-player-position="{{ player.primary_position }}"
@@ -52,6 +52,7 @@
                         </td>
                         <td class="player-position">{{ player.primary_position }}</td>
                         <td>{{ player.previous_performance }}</td>
+
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -86,6 +87,7 @@
 
         // Handle info icon click
         $('.info-icon').on('click', function(event) {
+
             event.preventDefault();  // Prevent default link behavior
             const playerName = $(this).data('player-name') || 'Unknown Player';
             const playerPos = $(this).data('player-position') || 'Position Unknown';

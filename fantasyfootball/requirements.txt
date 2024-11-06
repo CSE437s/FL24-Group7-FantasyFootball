@@ -18,7 +18,7 @@ MarkupSafe==3.0.1
 mccabe==0.7.0
 mdurl==0.1.2
 myql==1.2.7
-numpy>=1.21,<2.0
+numpy==2.1.2
 oauthlib==3.2.2
 packaging==24.1
 pandas==2.2.3
