@@ -22,4 +22,4 @@ def index():
 
 if __name__ == '__main__':
     print(app.url_map)  # Add this line to print the URL map
-    app.run(debug=True, port=3000, ssl_context=('cert.pem', 'key.pem'))
+    app.run(debug=True, host='0.0.0.0', port=3000, ssl_context=('cert.pem', 'key.pem'))

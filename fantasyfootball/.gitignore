@@ -11,3 +11,7 @@ key.pem
 
 #ignore data folder and all contents
 data/
+
+../.DS_Store
+/__pycache__/
+

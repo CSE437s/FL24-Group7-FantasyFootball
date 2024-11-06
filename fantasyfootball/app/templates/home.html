@@ -20,6 +20,9 @@
         <button type="submit">Select League</button>
     </form>
 
+    <!-- Loader element -->
+    <div class="loader" id="loader" style="display: none;"></div>
+
     {% if player_and_teams_loaded %}
         <h2>Connected!</h2>
         <!-- <h3>Players:</h3>
@@ -30,4 +33,11 @@
         </ul> -->
     {% endif %}
 </div>
+
+<!-- Add the JavaScript to show the loader when the form is submitted -->
+<script>
+    document.getElementById('leagueForm').addEventListener('submit', function() {
+        document.getElementById('loader').style.display = 'block';
+    });
+</script>
 {% endblock %}

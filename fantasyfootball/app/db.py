@@ -3,7 +3,7 @@ from psycopg2 import pool
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 # Define your connection pool globally
 try:
@@ -28,3 +28,4 @@ def get_connection():
 def release_connection(connection):
     # Return the connection to the pool
     postgreSQL_pool.putconn(connection)
+

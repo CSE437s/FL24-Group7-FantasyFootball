@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"  # Map container port 3000 to localhost port 3000
+    volumes:
+      - .:/app  # Mount current directory to /app in the container
+    environment:
+      FLASK_ENV: development  # Set Flask environment to development
