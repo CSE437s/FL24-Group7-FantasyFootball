@@ -43,7 +43,7 @@
                                 data-player-ranking="{{ player.previous_performance }}" 
                                 data-player-status="{{ player.status }}" 
                                 data-player-injury="{{ player.injury }}" 
-                                data-player-team="{{ player.team_abb }}" >{{ player.Player }} ({{ player.Pos }} - {{ player.team_abb }})</option>
+                                data-player-team="{{ player.team_abb }}" >{{ player.Player }} ({{ player.Pos }})</option>
                             {% endfor %}
                         </select>
                         <a href="#" class="info-icon" style="margin-left: 5px;">
@@ -63,15 +63,15 @@
                     <div class="player-info-container">
                         <select name="target_players" class="target_players">
                             {% for player in team2_roster %}
-                                <option value="{{ player[0] }}" 
-                                data-player-name="{{ player.Player }}" 
-                                data-player-pos="{{ player.Pos }}"
-                                data-player-headshot="{{ player.img }}" 
-                                data-player-bye="{{ player.bye }}" 
-                                data-player-ranking="{{ player.previous_performance }}" 
-                                data-player-status="{{ player.status }}" 
-                                data-player-injury="{{ player.injury }}" 
-                                data-player-team="{{ player.team_abb }}" >{{ player.Player }} ({{ player.Pos }} - {{ player.team_abb }})</option>
+                            <option value="{{ player[0] }}"
+                            data-player-name="{{ player.Player }}" 
+                            data-player-pos="{{ player.Pos }}"
+                            data-player-headshot="{{ player.img }}" 
+                            data-player-bye="{{ player.bye }}" 
+                            data-player-ranking="{{ player.previous_performance }}" 
+                            data-player-status="{{ player.status }}" 
+                            data-player-injury="{{ player.injury }}" 
+                            data-player-team="{{ player.team_abb }}" >{{ player.Player }} ({{ player.Pos }})</option>
                             {% endfor %}
                         </select>
                         <a href="#" class="info-icon" style="margin-left: 5px;">
@@ -135,9 +135,7 @@
 
     // Show info icon when player is selected
     $('.your_players, .target_players').change(function() {
-        console.log('here')
         const selectedOption = $(this).find('option:selected');
-        // console.log(selectedOption);
         const infoIcon = $(this).siblings('.info-icon');
 
         // Populate the info icon with player data
@@ -161,9 +159,6 @@
         event.preventDefault();  // Prevent default link behavior
         const playerData = $(this).data();
 
-        // Debugging: Check player data in the console
-        console.log("Player Data:", playerData);
-
         // Populate the dashboard with player data
         document.getElementById("dashboardPlayerName").innerText = playerData.playerName;
         document.getElementById("dashboardPlayerPosition").innerText = playerData.playerPos;
@@ -171,10 +166,9 @@
         document.getElementById("playerTeam").innerText = playerData.playerTeam;
         document.getElementById("byeWeek").innerText = playerData.playerBye;
         document.getElementById("playerRanking").innerText = playerData.playerRanking;
-        document.getElementById("injury").innerText = playerData.playerStatus + ": " + playerData.playerInjury;
+        document.getElementById("injury").innerText = playerData.playerInjury;
 
         // Display the modal
-        console.log($('#playerDashboard'))
         $('#playerDashboard').show();
     });
 
@@ -197,52 +191,53 @@
 
     function confirmTrade() {
         event.preventDefault();
-        var yourPlayers = [];
-        var targetPlayers = [];
+    //     var yourPlayers = [];
+    //     var targetPlayers = [];
 
-        $('select[name="your_players"]').each(function() {
-            yourPlayers.push($(this).val());
-        });
+    //     $('select[name="your_players"]').each(function() {
+    //         yourPlayers.push($(this).val());
+    //     });
 
-        $('select[name="target_players"]').each(function() {
-            targetPlayers.push($(this).val());
-        });
+    //     $('select[name="target_players"]').each(function() {
+    //         targetPlayers.push($(this).val());
+    //     });
 
-        var team1Name = $('input[name="team1"]').val();
-        var team2Name = $('input[name="team2"]').val();
+    //     var team1Name = $('input[name="team1"]').val();
+    //     var team2Name = $('input[name="team2"]').val();
 
-        var message = `
-        <div class="team-section">
-            <h4>${team1Name} trades:</h4>
-            <ul class="player-list">
-                ${yourPlayers.map(player => `<li>${player}</li>`).join('')}
-            </ul>
-        </div>
-        <div class="team-section">
-            <h4>${team2Name} trades:</h4>
-            <ul class="player-list">
-                ${targetPlayers.map(player => `<li>${player}</li>`).join('')}
-            </ul>
-        </div>
-    `;
+    //     var message = `
+    //     <div class="team-section">
+    //         <h4>${team1Name} trades:</h4>
+    //         <ul class="player-list">
+    //             ${yourPlayers.map(player => `<li>${player}</li>`).join('')}
+    //         </ul>
+    //     </div>
+    //     <div class="team-section">
+    //         <h4>${team2Name} trades:</h4>
+    //         <ul class="player-list">
+    //             ${targetPlayers.map(player => `<li>${player}</li>`).join('')}
+    //         </ul>
+    //     </div>
+    // `;
 
-        $('#tradeDetails').html(message);
+    //     $('#tradeDetails').html(message);
+    alert("Trade Confirmed!");
         return true;
     }
 
     function copyTrade() {
-        const tradeDetails = document.getElementById("tradeDetails");
-        if (!tradeDetails || tradeDetails.innerHTML.trim() === "") {
-            alert("There are no trade details to copy.");
-            return;
-        }
+        // const tradeDetails = document.getElementById("tradeDetails");
+        // if (!tradeDetails || tradeDetails.innerHTML.trim() === "") {
+        //     alert("There are no trade details to copy.");
+        //     return;
+        // }
 
-        const tempTextArea = document.createElement("textarea");
-        tempTextArea.value = tradeDetails.innerText;
-        document.body.appendChild(tempTextArea);
-        tempTextArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(tempTextArea);
+        // const tempTextArea = document.createElement("textarea");
+        // tempTextArea.value = tradeDetails.innerText;
+        // document.body.appendChild(tempTextArea);
+        // tempTextArea.select();
+        // document.execCommand("copy");
+        // document.body.removeChild(tempTextArea);
         alert("Trade details copied to clipboard!");
     }
 

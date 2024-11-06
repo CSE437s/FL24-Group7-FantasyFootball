@@ -37,7 +37,7 @@ def extract_serializable_data(obj):
 
 @api.route("/auth", methods=["GET"])
 def auth():
-    
+
     redirect_uri = os.getenv("REDIRECT_URI")
     client_id = os.getenv("YAHOO_CLIENT_ID")
     client_secret = os.getenv("YAHOO_CLIENT_SECRET")
@@ -84,7 +84,7 @@ def home():
     for league in leagues:
         if isinstance(league.name, bytes):
             league.name = league.name.decode("utf-8")
-            
+
 
     if request.method == "POST":
         selected_league_id = request.form.get("league_id")
@@ -96,7 +96,7 @@ def home():
             yahoo_consumer_secret=os.getenv("YAHOO_CLIENT_SECRET"),
             env_file_location=Path(""),
         )
-    
+
         player_team_data = []
         league_teams = query.get_league_teams()
         # all_players = query.get_league_players()
@@ -123,7 +123,7 @@ def home():
                         "previous_performance": player_stats.player_points.total,
                         "games_played": player_stats.player_stats.stats[0].value,
                         "total_points": player_stats.player_points.total,
-                        "ppg": (player_stats.player_points.total / player_stats.player_stats.stats[0].value 
+                        "ppg": (player_stats.player_points.total / player_stats.player_stats.stats[0].value
                                 if player_stats.player_stats.stats[0].value != 0 else 0)
 
                     }
@@ -152,7 +152,7 @@ def home():
         #         }
         #     )
 
-        
+
 
         # Mahomes
         # stat ID 4 - passing yds
@@ -197,17 +197,17 @@ def home():
         #         for stat in stat_list:
 
         #             stat = stat._extracted_data
-                    
+
         #             stat_name = stat.name
         #             stat_value = stat.value
 
         #             if stat_name and stat_value is not None:
-                        
+
         #                 player_info[stat_name] = stat_value
         #             else:
         #                 print(f"Stat data missing for player: {player.name.full}, stat: {stat_name}")
 
-            
+
             # player_team_data.append(player_info)
 
         # Create the DataFrame
@@ -244,61 +244,76 @@ def update_ownership():
     df = pd.read_csv("data/player_team_data.csv")
 
     try:
+        # Get the current page number and position filter from query parameters
+        page = request.args.get('page', 1, type=int)
+        position_filter = request.args.get('positionFilter', '', type=str)
+        per_page = "25"
+
         # Get connection from the pool
         connection = get_connection()
         cursor = connection.cursor()
 
-        # Iterate over the DataFrame and update the database
-        for index, row in df.iterrows():
-            player_name = row["player_name"]
-            team_name = row["team_name"]
-            primary_position = row["primary_position"]
-            bye = row["bye"]
-            team_abb = row["team_abb"]
-            image = row["image"]
-            status = row["status"]
-            injury = row["injury"]
-            key = row["player_key"]
-            previous_week = row["previous_week"]
-            previous_performance = row["previous_performance"]
-            games_played = row["games_played"]
-            total_points = row["total_points"]
-            ppg = row["ppg"]
-            
-
-
-            # Check if the player is in the database
+        # Modify SQL query based on position filter
+        if position_filter:
+            print("Executing query with position filter...")
             cursor.execute(
-                'SELECT COUNT(*) FROM "player_data" WHERE "player_name" = %s', (player_name,)
-            )
-            exists = cursor.fetchone()[0]
+                'SELECT player_name, primary_position, image, previous_performance, team_name, bye, status, injury '
+                'FROM player_data '
+                'WHERE primary_position = %s '
+                'LIMIT %s OFFSET %s',
+                (position_filter, per_page, (page - 1) * per_page)
+)
 
-            if exists > 0:
-                # Update all relevant fields for the player
-                cursor.execute(
-                    '''UPDATE "player_data"
-                    SET "team_name" = %s, "primary_position" = %s, "bye" = %s, 
-                        "team_abb" = %s, "image" = %s, "status" = %s, "injury" = %s, 
-                        "player_key" = %s, "previous_week" = %s, 
-                        "previous_performance" = %s, "games_played" = %s, 
-                        "total_points" = %s, "ppg" = %s
-                    WHERE "player_name" = %s''',
-                    (team_name, primary_position, bye, team_abb, image, status, injury, key,
-                    previous_week, previous_performance, games_played, total_points, ppg, player_name)
-                )
+        else:
+            print("Executing query without position filter...")
+            cursor.execute(
+            'SELECT player_name, primary_position, image, previous_performance, team_name, bye, status, injury '
+            'FROM player_data '
+            'LIMIT %s OFFSET %s',
+            (per_page, (page - 1) * per_page)
+        )
 
-        # Commit the transaction
-        connection.commit()
+        rows = cursor.fetchall()
+
+        # Convert rows to dictionary format
+        waiver_wire_players = [
+            {
+            "player_name": row[0],
+            "primary_position": row[1],
+            "image": row[2],
+            "previous_performance": row[3],
+            "team_name": row[4],
+            "bye": row[5],
+            "status": row[6],
+            "injury": row[7]
+            }
+            for row in rows
+        ]
+
+    # Calculate pagination
+        total = len(waiver_wire_players)
+        total_pages = (total + per_page - 1) // per_page  # Calculate total pages
+        start = (page - 1) * per_page
+        end = start + per_page
+        paginated_players = waiver_wire_players[start:end]
 
         # Close cursor and release connection
         cursor.close()
         release_connection(connection)
 
-        return jsonify({"message": "Ownership status updated successfully."}), 200
+        # Render the waiver_wire template with paginated player data and filter info
+        return render_template(
+        "waiver_wire.html",
+        waiver_wire_players=paginated_players,
+        page=page,
+        total_pages=total_pages,
+        position_filter=position_filter
+    )
 
-    except Exception as error:
-        print("Error updating ownership status:", error)
-        return jsonify({"error": "Error updating ownership status."}), 500
+    except Exception as e:
+        print("An error occurred:", e)
+    return jsonify({"error": "An error occurred while processing the request."}), 500
+
 
 
 @main.route("/waiver-wire")
@@ -317,15 +332,15 @@ def waiver_wire():
         if position_filter:
             cursor.execute(
                 'SELECT player_name, primary_position, image, previous_performance, team_name, bye, status, injury '
-                'FROM player_data'
-                'WHERE position = %s '
+                'FROM player_data '
+                'WHERE primary_position = %s '
                 'LIMIT %s OFFSET %s',
                 (position_filter, per_page, (page - 1) * per_page)
             )
         else:
             cursor.execute(
                 'SELECT player_name, primary_position, image, previous_performance, team_name, bye, status, injury '
-                'FROM player_data'
+                'FROM player_data '
                 'LIMIT %s OFFSET %s',
                 (per_page, (page - 1) * per_page)
             )
@@ -469,7 +484,7 @@ def team_analyzer():
         all_teams = cursor.fetchall()
         cursor.close()
         release_connection(connection)
-        
+
         teams = [team[0] for team in all_teams if team[0] is not None]
         selected_team = None
         players = []
@@ -482,7 +497,7 @@ def team_analyzer():
             team_players = cursor.fetchall()
             cursor.close()
             release_connection(connection)
-            
+
             for player in team_players:
                 player_data = {
                     'Player': player[0],
@@ -550,7 +565,7 @@ def trade_builder():
                 'SELECT "player_name", "primary_position", "image", "previous_performance", "team_name", "bye", "status", "injury", "player_key", "previous_week", "ppg", "total_points", "team_abb" FROM "player_data" WHERE "team_name" = %s',
                 (team1,),
             )
-            team1_roster = cursor.fetchall()            
+            team1_roster = cursor.fetchall()
 
             # Fetch team 2 roster
             cursor.execute(
@@ -568,13 +583,15 @@ def trade_builder():
                     'Pos': player[1],
                     'img': player[2],
                     'previous_performance': player[3],
-                    'bye': player[4],
-                    'status': player[5],
-                    'injury': player[6],
-                    'previous_week': player[7],
-                    'ppg': player[8],
-                    'total_points': player[9],
-                    'team_abb': player[10]
+                    'team_name': player[4],
+                    'bye': player[5],
+                    'status': player[6],
+                    'injury': player[7],
+                    'player_key': player[8],
+                    'previous_week': player[9],
+                    'ppg': player[10],
+                    'total_points': player[11],
+                    'team_abb': player[12]
                 }
                 team1_roster_info.append(team1_info)
 
@@ -585,13 +602,15 @@ def trade_builder():
                     'Pos': player[1],
                     'img': player[2],
                     'previous_performance': player[3],
-                    'bye': player[4],
-                    'status': player[5],
-                    'injury': player[6],
-                    'previous_week': player[7],
-                    'ppg': player[8],
-                    'total_points': player[9],
-                    'team_abb': player[10]
+                    'team_name': player[4],
+                    'bye': player[5],
+                    'status': player[6],
+                    'injury': player[7],
+                    'player_key': player[8],
+                    'previous_week': player[9],
+                    'ppg': player[10],
+                    'total_points': player[11],
+                    'team_abb': player[12]
                 }
                 team2_roster_info.append(team2_info)
 

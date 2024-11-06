@@ -37,16 +37,15 @@
                     <tr>
                         <td>
                             {{ player.player_name }}
-                            <a href="#" class="info-icon" 
-                            data-player-name="{{ player.player_name }}" 
+                            <a href="#" class="info-icon"
+                            data-player-name="{{ player.player_name }}"
                             data-player-position="{{ player.primary_position }}"
                             data-player-headshot="{{ player.image }}"
                             data-proj-points="{{ player.previous_performance }}"
                             data-player-team="{{ player.team_name }}"
                             data-player-bye="{{ player.bye }}"
-                            data-player-ranking="{{ player.ranking }}"
                             data-player-status="{{ player.status }}"
-                            data-player-injury="{{ player.injury }}" 
+                            data-player-injury="{{ player.injury }}"
                             style="margin-left: 5px;">
                                 <i class="fas fa-info-circle"></i> <!-- Font Awesome info icon -->
                             </a>
@@ -94,20 +93,28 @@
             const projPoints = $(this).data('proj-points') || 'N/A'; // Change this to projected points
             const playerTeam = $(this).data('player-team') || 'Team Unknown';
             const playerBye = $(this).data('player-bye') || 'N/A';
-            const playerRanking = $(this).data('player-ranking') || 'Not Ranked';
-            const playerStatus = $(this).data('player-status') || 'Status Unknown';
-            const playerInjury = $(this).data('player-injury') || 'No Injury Information';        
+            const playerStatus = $(this).data('player-status') || '';
+            const playerInjury = $(this).data('player-injury') || 'No Injury Information';
 
             // Populate the dashboard with player name and placeholder data
             document.getElementById("dashboardPlayerName").innerText = playerName;
+            document.getElementById("dashboardPlayerName").style.textAlign = "center";
             document.getElementById("dashboardPlayerPosition").innerText = playerPos;
-            document.getElementById("playerHeadshot").src = playerHeadshot;
+            document.getElementById("dashboardPlayerPosition").style.textAlign = "center";
+            const playerHeadshotElement = document.getElementById("playerHeadshot");
+            playerHeadshotElement.src = playerHeadshot;
+            playerHeadshotElement.style.display = "block";
+            playerHeadshotElement.style.margin = "0 auto";
             document.getElementById("playerTeam").innerText = playerTeam;
+            document.getElementById("playerTeam").style.textAlign = "center";
             // document.getElementById("projectedPoints").innerText = "Last Weeks points: " + projPoints; // Change this to projected points
             document.getElementById("byeWeek").innerText =playerBye;
-            document.getElementById("playerRanking").innerText = playerRanking;
+            document.getElementById("byeWeek").style.textAlign = "center";
+            document.getElementById("playerRanking").innerText = projPoints;
+            document.getElementById("playerRanking").style.textAlign = "center";
             // document.getElementById("opponentTeam").innerText = "TEN";
             document.getElementById("injury").innerText = playerStatus + ": " + playerInjury;
+            document.getElementById("injury").style.textAlign = "center";
 
             // Display the modal
             $('#playerDashboard').show();
@@ -117,7 +124,7 @@
         $('#closeDashboard').on('click', function() {
             $('#playerDashboard').hide();
         });
-        
+
         // Close the dashboard when clicking outside of the modal content
         $(window).on('click', function(event) {
             if ($(event.target).is('#playerDashboard')) {
