@@ -1,0 +1,14 @@
+<!-- app/templates/logout.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<p>Logging out...</p>
+<script>
+    // Redirect to Yahoo's logout page
+    window.location.href = "https://login.yahoo.com/config/login?logout=1&redirect={{ url_for('main.index') }}";
+    // After a delay, redirect back to the index page
+    setTimeout(function() {
+        window.location.href = "{{ url_for('main.index') }}";
+    }, 1000); // Adjust the delay as needed (1000 milliseconds = 1 second)
+</script>
+{% endblock %}
