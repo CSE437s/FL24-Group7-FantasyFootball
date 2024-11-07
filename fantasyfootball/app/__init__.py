@@ -1,12 +1,12 @@
 # app/__init__.py
 
-from flask import Flask, g, session
+from flask import Flask, g, session, render_template
 import os
 from dotenv import load_dotenv
 from .db import (
     create_access_tokens_table,
     get_user_by_id,
-    get_access_token_by_guid,
+    get_access_token_by_user_id,
     create_users_table,
 )
 from .routes import api, main
@@ -28,14 +28,17 @@ def create_app():
     create_access_tokens_table()
     create_users_table()
 
+    @app.route("/")
+    def index():
+        return render_template("index.html")
+
     @app.before_request
     def middleware():
         g.user_id = session.get("user_id")
         # print("middleware g.user_id: ", g.user_id)
 
-
         if not g.user_id:
-            # print("No user_id found in session")
+            print("No user_id found in session")
             return  # Exit early if no user_id is found
         # print("user_id ", g.user_id)
         g.user = get_user_by_id(g.user_id)
@@ -47,19 +50,20 @@ def create_app():
             # print("No guid found for user:", g.user)
             return
         # print("guid ", g.user["guid"])
-        g.access_token = get_access_token_by_guid(g.user["guid"])
+        g.access_token = get_access_token_by_user_id(g.user_id)
         if not g.access_token:
             # print("No access token found for guid:", g.user["guid"])
             return  # Exit early if access token not found
-        
-        # print("g values set: ", g.access_token, g.user_id, g.user["guid"])
 
+        # print("g values set: ", g.access_token, g.user_id, g.user["guid"])
 
     def clear_session_on_exit():
         """Clear session data when the app is shutting down."""
         with app.app_context():
             session.clear()
             print("Session cleared on application shutdown")
+        for key in iter(g):
+            g.pop(key)
 
     # Register the clear function to run when the app exits
     # TODO: this gets an error when you ctrl+c to stop the server, idk if it needs a fix

@@ -80,6 +80,7 @@ def create_access_tokens_table():
 
     Columns:
         id: SERIAL PRIMARY KEY
+        user_id: INTEGER NOT NULL
         access_token: TEXT NOT NULL
         consumer_key: TEXT NOT NULL
         consumer_secret: TEXT NOT NULL
@@ -96,6 +97,7 @@ def create_access_tokens_table():
                 """
                 CREATE TABLE IF NOT EXISTS access_tokens (
                     id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL,
                     access_token TEXT NOT NULL,
                     consumer_key TEXT NOT NULL,
                     consumer_secret TEXT NOT NULL,
@@ -252,12 +254,13 @@ def verify_password(stored_password, provided_password):
     return check_password_hash(stored_password, provided_password)
 
 
-def save_access_token(token_dict):
+def save_access_token(user_id, token_dict):
     """
     Save an access token and related information to the access_tokens table.
     If an entry with the same GUID already exists, it is updated.
 
     Args:
+        user_id: The ID of the user.
         token_dict: A dictionary containing the access token information.
     """
     if not table_exists('access_tokens'):
@@ -268,8 +271,8 @@ def save_access_token(token_dict):
             cursor.execute(
                 """
                 INSERT INTO access_tokens (
-                    access_token, consumer_key, consumer_secret, guid, refresh_token, token_time, token_type
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    user_id, access_token, consumer_key, consumer_secret, guid, refresh_token, token_time, token_type
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (guid) DO UPDATE SET
                     access_token = EXCLUDED.access_token,
                     consumer_key = EXCLUDED.consumer_key,
@@ -280,6 +283,7 @@ def save_access_token(token_dict):
                     created_at = CURRENT_TIMESTAMP
                 """,
                 (
+                    user_id,
                     token_dict["access_token"],
                     token_dict["consumer_key"],
                     token_dict["consumer_secret"],
@@ -292,6 +296,40 @@ def save_access_token(token_dict):
         conn.commit()
     except Exception as e:
         conn.rollback()
+        raise e
+    finally:
+        release_connection(conn)
+
+def get_access_token_by_user_id(user_id):
+    """
+    Retrieve an access token from the access_tokens table by the user's user_id.
+
+    Args:
+        user_id: The ID of the user.
+
+    Returns:
+        dict: A dictionary containing the access token information, or None if the token is not found.
+    """
+    if not table_exists('access_tokens'):
+        create_access_tokens_table()
+    conn = get_connection()
+    try:
+        with conn.cursor(cursor_factory=extras.DictCursor) as cursor:
+            cursor.execute(
+                """
+                SELECT access_token, consumer_key, consumer_secret, guid, refresh_token, token_time, token_type
+                FROM access_tokens
+                WHERE user_id = %s
+                ORDER BY id DESC
+                LIMIT 1
+                """,
+                (user_id,),
+            )
+            result = cursor.fetchone()
+            if result:
+                return dict(result)
+            return None
+    except Exception as e:
         raise e
     finally:
         release_connection(conn)

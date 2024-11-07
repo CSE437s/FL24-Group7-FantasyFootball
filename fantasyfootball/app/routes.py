@@ -104,10 +104,17 @@ def login():
     return render_template("login.html")
 
 
-@main.route("/logout")
+@main.route("/logout",methods=["GET", "POST"])
 def logout():
-    session.clear()
-    return redirect("https://login.yahoo.com/config/login?logout=1&.direct=1")
+    if request.method == "POST":
+        # Clear session and pop all keys from g
+        session.clear()
+        for key in iter(g):
+            g.pop(key)
+        # Redirect to Yahoo's logout page
+        return render_template("logout.html")
+    # return redirect(f"https://login.yahoo.com/config/login?logout=1&.direct=1&.done={url_for('index', _external=True)}")
+    return render_template("confirm_logout.html")
 
 
 @api.route("/oauth", methods=["GET", "POST"])
@@ -161,7 +168,7 @@ def callback():
     curr_user_guid = query.get_current_user()._extracted_data["guid"]
     yahoo_access_token = query._yahoo_access_token_dict
     yahoo_access_token["guid"] = curr_user_guid
-    save_access_token(yahoo_access_token)
+    save_access_token(user["id"],yahoo_access_token)
     # Update the user's GUID in the users table if it is currently null
     user_id = user["id"]
     return redirect(url_for("main.home"))
@@ -171,9 +178,10 @@ def callback():
 def home():
 
     # TODO does not get access token here because it doesn't get right guid, and that's how we were accessing access token.
-    yahoo_access_token = g.access_token
-    print("home", yahoo_access_token)
-    if not yahoo_access_token:
+    if g.access_token is not None:
+        yahoo_access_token = g.access_token
+        print("home", yahoo_access_token)
+    else:
         return redirect(url_for("api.oauth"))
 
     user_id = g.user_id
