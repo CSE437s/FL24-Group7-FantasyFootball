@@ -1,7 +1,7 @@
 from flask import Flask
-from os import urandom
+from app.db import create_player_data_table
 
 def create_app():
     app = Flask(__name__)
-    app.secret_key = urandom(24)
+    create_player_data_table()
     return app
