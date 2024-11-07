@@ -103,32 +103,33 @@ def login():
 
     return render_template("login.html")
 
+
 @main.route("/logout")
 def logout():
     session.clear()
     return redirect("https://login.yahoo.com/config/login?logout=1&.direct=1")
 
+
 @api.route("/oauth", methods=["GET", "POST"])
 def oauth():
     print("oauth")
-    user_id = session.get("user_id")
+    user_id = g.user_id
     if not user_id:
+        print("no user_id in oauth whoops")
         return redirect(url_for("main.login"))
-    print("user_id: ",user_id)
+    print("user_id: ", user_id)
+    access_token = g.access_token
 
-    user = get_user_by_id(user_id)
-    if not user:
-        return redirect(url_for("main.login"))
-    print("user: ",user)
-    access_token = get_access_token_by_guid(user["guid"])
-    if access_token:
-        g.access_token = access_token
+    # TODO I think this needs to be more robust haha, what if access_token is expired or access_token = 42 or something like that
+    if access_token is not None:
         return redirect(url_for("main.home"))
     else:
+        print("\noauth else hits!\n")
         REDIRECT_URI = url_for("api.callback", _external=True)
         CLIENT_ID = os.getenv("YAHOO_CLIENT_ID")
         CLIENT_SECRET = os.getenv("YAHOO_CLIENT_SECRET")
         RESPONSE_TYPE = "code"
+            
         auth_url = f"https://api.login.yahoo.com/oauth2/request_auth?client_id={CLIENT_ID}&client_secret={CLIENT_SECRET}&redirect_uri={REDIRECT_URI}&response_type={RESPONSE_TYPE}"
         webbrowser.open_new_tab(auth_url)
         return render_template("auth.html")
@@ -136,14 +137,12 @@ def oauth():
 
 @api.route("/callback", methods=["GET", "POST"])
 def callback():
-    print("callback")
-    user_id = g.user_id
-    print("user_id: ",user_id)
-    user = get_user_by_id(user_id)
+   
+    # print("callback")
+    user = g.user
     if not user:
         return redirect(url_for("main.login"))
-    print("user: ",user)
-
+    # print("user: ", user)
     if request.method == "POST":
         verification_code = request.form.get("verification_code")
         if not verification_code:
@@ -157,31 +156,37 @@ def callback():
         game_id=449,
         yahoo_consumer_key=os.getenv("YAHOO_CLIENT_ID"),
         yahoo_consumer_secret=os.getenv("YAHOO_CLIENT_SECRET"),
-        env_file_location=Path(""),
     )
-
+    
     curr_user_guid = query.get_current_user()._extracted_data["guid"]
     yahoo_access_token = query._yahoo_access_token_dict
     yahoo_access_token["guid"] = curr_user_guid
     save_access_token(yahoo_access_token)
-    print(yahoo_access_token)
     # Update the user's GUID in the users table if it is currently null
-    update_user_guid(user_id, curr_user_guid)
-    session["curr_user_guid"] = curr_user_guid
-    print("user by id",get_user_by_id(user_id))
+    user_id = user["id"]
     return redirect(url_for("main.home"))
 
 
 @main.route("/home", methods=["GET", "POST"])
 def home():
+
+    # TODO does not get access token here because it doesn't get right guid, and that's how we were accessing access token.
     yahoo_access_token = g.access_token
-    print("home",yahoo_access_token)
+    print("home", yahoo_access_token)
     if not yahoo_access_token:
         return redirect(url_for("api.oauth"))
 
     user_id = g.user_id
     user = get_user_by_id(user_id)
     user_guid = user["guid"]
+
+    query = YahooFantasySportsQuery(
+        league_id="<YAHOO_LEAGUE_ID>",
+        game_code="nfl",
+        game_id=449,
+        yahoo_access_token_json=yahoo_access_token,
+    )
+
     leagues = query.get_user_leagues_by_game_key(449)
 
     for league in leagues:
@@ -199,6 +204,7 @@ def home():
         )
 
         league_teams = query.get_league_teams()
+        print([team.serialized() for team in league_teams])
         for team in league_teams:
             if isinstance(team.name, bytes):
                 team.name = team.name.decode("utf-8")

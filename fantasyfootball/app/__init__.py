@@ -29,42 +29,40 @@ def create_app():
     create_users_table()
 
     @app.before_request
-    def load_access_token_middleware():
-        user_id = session.get("user_id")
-        user_guid = session.get("curr_user_guid")
-        print("middleware user guid: ",user_guid)
+    def middleware():
+        g.user_id = session.get("user_id")
+        # print("middleware g.user_id: ", g.user_id)
 
 
-        # Default values for g in case conditions aren't met
-        g.access_token = None
-        g.user_id = None
-        g.user_guid = None
-
-        if not user_id:
+        if not g.user_id:
+            # print("No user_id found in session")
             return  # Exit early if no user_id is found
-        print("user_id ",user_id)
-        user = get_user_by_id(user_id)
-        if not user:
+        # print("user_id ", g.user_id)
+        g.user = get_user_by_id(g.user_id)
+        if not g.user:
+            # print("No user found with user_id:", g.user_id)
             return  # Exit early if user not found
-        print("user ",user)
-        print("guid ",user["guid"])
-        access_token = get_access_token_by_guid(user["guid"])
-        if not access_token:
+        # print("user ", g.user)
+        if "guid" not in g.user:
+            # print("No guid found for user:", g.user)
+            return
+        # print("guid ", g.user["guid"])
+        g.access_token = get_access_token_by_guid(g.user["guid"])
+        if not g.access_token:
+            # print("No access token found for guid:", g.user["guid"])
             return  # Exit early if access token not found
+        
+        # print("g values set: ", g.access_token, g.user_id, g.user["guid"])
 
-        # If all checks pass, set g variables
-        g.access_token = access_token
-        g.user_id = user_id
-        g.user_guid = user["guid"]
 
     def clear_session_on_exit():
         """Clear session data when the app is shutting down."""
-        with app.app_context(): 
+        with app.app_context():
             session.clear()
             print("Session cleared on application shutdown")
 
     # Register the clear function to run when the app exits
-    #TODO: this gets an error when you ctrl+c to stop the server, idk if it needs a fix
+    # TODO: this gets an error when you ctrl+c to stop the server, idk if it needs a fix
     atexit.register(clear_session_on_exit)
 
     return app
