@@ -130,7 +130,7 @@
             const playerBye = $(this).data('player-bye');
             const playerRanking = $(this).data('player-ranking');
             const playerStatus = $(this).data('player-status');
-            const playerInjury = $(this).data('player-injury');
+            const playerInjury = $(this).data('player-injury') || 'N/A';
 
             // Populate the dashboard with player data
             document.getElementById("dashboardPlayerName").innerText = playerName;

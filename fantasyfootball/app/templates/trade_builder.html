@@ -198,7 +198,7 @@ $(document).ready(function() {
         document.getElementById("playerTeam").innerText = playerData.playerTeam;
         document.getElementById("byeWeek").innerText = playerData.playerBye;
         document.getElementById("playerRanking").innerText = playerData.playerRanking;
-        document.getElementById("injury").innerText = playerData.playerInjury;
+        document.getElementById("injury").innerText = playerData.playerInjury || 'N/A';;
         // Display the modal
         $('#playerDashboard').show();
     });
