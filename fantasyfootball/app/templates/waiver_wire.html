@@ -95,8 +95,8 @@
             const projPoints = $(this).data('proj-points') || 'N/A'; // Change this to projected points
             const playerTeam = $(this).data('player-team') || 'Team Unknown';
             const playerBye = $(this).data('player-bye') || 'N/A';
-            const playerStatus = $(this).data('player-status') || '';
-            const playerInjury = $(this).data('player-injury') || 'N/A';
+            const playerStatus = $(this).data('player-status') || 'None';
+            const playerInjury = $(this).data('player-injury') || 'None';
 
             // Populate the dashboard with player name and placeholder data
             document.getElementById("dashboardPlayerName").innerText = playerName;
@@ -115,7 +115,11 @@
             document.getElementById("playerRanking").innerText = projPoints;
             document.getElementById("playerRanking").style.textAlign = "center";
             // document.getElementById("opponentTeam").innerText = "TEN";
-            document.getElementById("injury").innerText = playerStatus + ": " + playerInjury;
+            if (playerStatus === "None" && playerInjury === "None") {
+                document.getElementById("injury").innerText = "N/A";
+            } else {
+                document.getElementById("injury").innerText = playerStatus + " - " + playerInjury;
+            }
             document.getElementById("injury").style.textAlign = "center";
 
             // Display the modal

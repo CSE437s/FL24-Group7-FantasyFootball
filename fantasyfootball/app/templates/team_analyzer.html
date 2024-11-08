@@ -26,10 +26,9 @@
                 <tr>
                     <th>Player</th>
                     <th>Position</th>
-                    <!-- <th>PPG</th>
                     <th>Total Points</th>
-                    <th>Consistency Grade</th>
-                    <th>Ovr Grade</th> -->
+                    <!-- <th>PPG</th> -->
+                    <th>Ovr Grade</th>
                 </tr>
             </thead>
             <tbody>
@@ -51,10 +50,9 @@
                         </a>
                     </td>
                     <td>{{ player.Pos }}</td>
-                    <!-- <td>{{ player.ppg }}</td>
-                    <td>{{ player.total_points }}</td>
-                    <td>{{ player.std_dev }}</td>
-                    <td>{{ player.grade }}</td> -->
+                    <!-- <td>{{ player.ppg }}</td> -->
+                    <td>{{ player.season_total_points}}</td>
+                    <td>{{ player.grade }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -86,30 +84,6 @@
     
 </div>
 
-<!-- Player Info Dashboard Modal -->
-<!-- <div id="playerDashboard" class="modal" style="display: none;">
-    <div class="modal-content">
-        <span id="closeDashboard" class="close">&times;</span>
-        <h3 id="dashboardPlayerName"></h3>
-        <p id="dashboardPlayerPosition"></p>
-
-       
-        <div class="dashboard-section">
-            <h4>Recent Performance</h4>
-            <ul id="recentPerformance"></ul> 
-        </div>
-
-        <div class="dashboard-section">
-            <h4>Projected Points</h4>
-            <p id="projectedPoints">Loading...</p>
-        </div>
-
-        <div class="dashboard-section">
-            <h4>Matchup Analysis</h4>
-            <p id="matchupAnalysis">Loading...</p>
-        </div>
-    </div>
-</div> -->
 
 <!-- Font Awesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -129,8 +103,8 @@
             const playerTeam = $(this).data('player-team');
             const playerBye = $(this).data('player-bye');
             const playerRanking = $(this).data('player-ranking');
-            const playerStatus = $(this).data('player-status');
-            const playerInjury = $(this).data('player-injury') || 'N/A';
+            const playerStatus = $(this).data('player-status') || 'None';
+            const playerInjury = $(this).data('player-injury') || 'None';
 
             // Populate the dashboard with player data
             document.getElementById("dashboardPlayerName").innerText = playerName;
@@ -139,7 +113,11 @@
             document.getElementById("playerTeam").innerText = playerTeam;
             document.getElementById("byeWeek").innerText = playerBye;
             document.getElementById("playerRanking").innerText = playerRanking;
-            document.getElementById("injury").innerText =  playerInjury;
+            if (playerStatus === "None" && playerInjury === "None") {
+                document.getElementById("injury").innerText = "N/A";
+            } else {
+                document.getElementById("injury").innerText = playerStatus + " - " + playerInjury;
+            }
 
             // Display the modal
             $('#playerDashboard').show();
