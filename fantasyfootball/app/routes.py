@@ -270,16 +270,16 @@ def waiver_wire():
         # Modify SQL query based on position filter
         if position_filter:
             cursor.execute(
-                'SELECT player_name, primary_position, bye_week, team_abb, image_url, status, injury, player_key '
-                'FROM waiver_players '
-                'WHERE primary_position = %s '
+                'SELECT "player_name", "primary_position", "image", "previous_performance", "bye", "status", "injury", "previous_week", "ppg", "total_points","team_abb" '
+                'FROM "player_data" '
+                'WHERE "primary_position" = %s '
                 'LIMIT %s OFFSET %s',
                 (position_filter, per_page, (page - 1) * per_page)
             )
         else:
             cursor.execute(
-                'SELECT player_name, primary_position, bye_week, team_abb, image_url, status, injury, player_key '
-                'FROM waiver_players '
+                'SELECT "player_name", "primary_position", "image", "previous_performance", "bye", "status", "injury", "previous_week", "ppg", "total_points","team_abb" '
+                'FROM player_data '
                 'LIMIT %s OFFSET %s',
                 (per_page, (page - 1) * per_page)
             )
