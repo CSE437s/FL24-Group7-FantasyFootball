@@ -18,6 +18,7 @@ from app.db import (
     get_user_by_id,
     verify_password,
     update_user_guid,  # Import the new function
+    get_access_token_by_user_id
 )
 import numpy as np
 from dotenv import load_dotenv
@@ -109,8 +110,12 @@ def logout():
     if request.method == "POST":
         # Clear session and pop all keys from g
         session.clear()
-        for key in iter(g):
+        keys = g.__dict__.keys()
+        
+        for key in list(keys):
             g.pop(key)
+        
+            
         # Redirect to Yahoo's logout page
         return render_template("logout.html")
     # return redirect(f"https://login.yahoo.com/config/login?logout=1&.direct=1&.done={url_for('index', _external=True)}")
@@ -169,6 +174,8 @@ def callback():
     yahoo_access_token = query._yahoo_access_token_dict
     yahoo_access_token["guid"] = curr_user_guid
     save_access_token(user["id"],yahoo_access_token)
+    gotten_token_after_save = get_access_token_by_user_id(user["id"])
+    print("gotten_token_after_save: \n",gotten_token_after_save,"\n")
     # Update the user's GUID in the users table if it is currently null
     user_id = user["id"]
     return redirect(url_for("main.home"))
@@ -178,7 +185,7 @@ def callback():
 def home():
 
     # TODO does not get access token here because it doesn't get right guid, and that's how we were accessing access token.
-    if g.access_token is not None:
+    if g.access_token:
         yahoo_access_token = g.access_token
         print("home", yahoo_access_token)
     else:

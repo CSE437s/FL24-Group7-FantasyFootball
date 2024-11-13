@@ -43,16 +43,16 @@ def create_app():
         # print("user_id ", g.user_id)
         g.user = get_user_by_id(g.user_id)
         if not g.user:
-            # print("No user found with user_id:", g.user_id)
+            print("No user found with user_id:", g.user_id)
             return  # Exit early if user not found
         # print("user ", g.user)
         if "guid" not in g.user:
-            # print("No guid found for user:", g.user)
+            print("No guid found for user:", g.user)
             return
         # print("guid ", g.user["guid"])
         g.access_token = get_access_token_by_user_id(g.user_id)
         if not g.access_token:
-            # print("No access token found for guid:", g.user["guid"])
+            print("No access token found for user_id:", g.user_id)
             return  # Exit early if access token not found
 
         # print("g values set: ", g.access_token, g.user_id, g.user["guid"])
