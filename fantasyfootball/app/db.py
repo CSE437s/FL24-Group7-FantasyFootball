@@ -80,7 +80,7 @@ def create_access_tokens_table():
 
     Columns:
         id: SERIAL PRIMARY KEY
-        user_id: INTEGER NOT NULL
+        user_id: INTEGER NOT NULL UNIQUE
         access_token: TEXT NOT NULL
         consumer_key: TEXT NOT NULL
         consumer_secret: TEXT NOT NULL
@@ -97,7 +97,7 @@ def create_access_tokens_table():
                 """
                 CREATE TABLE IF NOT EXISTS access_tokens (
                     id SERIAL PRIMARY KEY,
-                    user_id INTEGER NOT NULL,
+                    user_id INTEGER NOT NULL UNIQUE,
                     access_token TEXT NOT NULL,
                     consumer_key TEXT NOT NULL,
                     consumer_secret TEXT NOT NULL,
@@ -257,7 +257,7 @@ def verify_password(stored_password, provided_password):
 def save_access_token(user_id, token_dict):
     """
     Save an access token and related information to the access_tokens table.
-    If an entry with the same GUID already exists, it is updated.
+    If an entry with the same user_id already exists, it is updated.
 
     Args:
         user_id: The ID of the user.
@@ -273,7 +273,7 @@ def save_access_token(user_id, token_dict):
                 INSERT INTO access_tokens (
                     user_id, access_token, consumer_key, consumer_secret, guid, refresh_token, token_time, token_type
                 ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                ON CONFLICT (guid) DO UPDATE SET
+                ON CONFLICT (user_id) DO UPDATE SET
                     access_token = EXCLUDED.access_token,
                     consumer_key = EXCLUDED.consumer_key,
                     consumer_secret = EXCLUDED.consumer_secret,
@@ -294,6 +294,9 @@ def save_access_token(user_id, token_dict):
                 ),
             )
         conn.commit()
+    except psycopg2.errors.UniqueViolation as e:
+        conn.rollback()
+        raise ValueError("This Yahoo account is already connected to an existing account. Please try a different Yahoo account.") from e
     except Exception as e:
         conn.rollback()
         raise e

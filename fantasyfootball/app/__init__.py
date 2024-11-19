@@ -35,7 +35,7 @@ def create_app():
     @app.before_request
     def middleware():
         g.user_id = session.get("user_id")
-        # print("middleware g.user_id: ", g.user_id)
+        print("middleware g.user_id: ", g.user_id)
 
         if not g.user_id:
             print("No user_id found in session")
@@ -60,8 +60,10 @@ def create_app():
     def clear_session_on_exit():
         """Clear session data when the app is shutting down."""
         with app.app_context():
-            session.clear()
-            print("Session cleared on application shutdown")
+            # Clear session data stored in the filesystem or database
+            session_interface = app.session_interface
+            if hasattr(session_interface, 'store'):
+                session_interface.store.clear()
         for key in iter(g):
             g.pop(key)
 

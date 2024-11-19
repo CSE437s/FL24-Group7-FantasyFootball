@@ -407,3 +407,13 @@ button[type="submit"]:hover {
     color: white;
 }
 
+/* notification for error on verification */
+.flash.error {
+    background-color: #ffa7ae;
+    color: #a02a36;
+  }
+  
+  .flash.success {
+    background-color: #96faad;
+    color: #1c7530;
+  }

@@ -1,5 +1,13 @@
 # /app/routes.py
-from flask import Blueprint, jsonify, request, redirect, url_for, session
+from flask import (
+    Blueprint,
+    jsonify,
+    request,
+    redirect,
+    url_for,
+    session,
+    flash,
+)
 import os
 from yfpy.query import YahooFantasySportsQuery
 from pathlib import Path
@@ -18,7 +26,7 @@ from app.db import (
     get_user_by_id,
     verify_password,
     update_user_guid,  # Import the new function
-    get_access_token_by_user_id
+    get_access_token_by_user_id,
 )
 import numpy as np
 from dotenv import load_dotenv
@@ -105,17 +113,16 @@ def login():
     return render_template("login.html")
 
 
-@main.route("/logout",methods=["GET", "POST"])
+@main.route("/logout", methods=["GET", "POST"])
 def logout():
     if request.method == "POST":
         # Clear session and pop all keys from g
         session.clear()
         keys = g.__dict__.keys()
-        
+
         for key in list(keys):
             g.pop(key)
-        
-            
+
         # Redirect to Yahoo's logout page
         return render_template("logout.html")
     # return redirect(f"https://login.yahoo.com/config/login?logout=1&.direct=1&.done={url_for('index', _external=True)}")
@@ -124,24 +131,20 @@ def logout():
 
 @api.route("/oauth", methods=["GET", "POST"])
 def oauth():
-    print("oauth")
     user_id = g.user_id
     if not user_id:
-        print("no user_id in oauth whoops")
         return redirect(url_for("main.login"))
-    print("user_id: ", user_id)
     access_token = g.access_token
 
     # TODO I think this needs to be more robust haha, what if access_token is expired or access_token = 42 or something like that
     if access_token is not None:
         return redirect(url_for("main.home"))
     else:
-        print("\noauth else hits!\n")
         REDIRECT_URI = url_for("api.callback", _external=True)
         CLIENT_ID = os.getenv("YAHOO_CLIENT_ID")
         CLIENT_SECRET = os.getenv("YAHOO_CLIENT_SECRET")
         RESPONSE_TYPE = "code"
-            
+
         auth_url = f"https://api.login.yahoo.com/oauth2/request_auth?client_id={CLIENT_ID}&client_secret={CLIENT_SECRET}&redirect_uri={REDIRECT_URI}&response_type={RESPONSE_TYPE}"
         webbrowser.open_new_tab(auth_url)
         return render_template("auth.html")
@@ -149,12 +152,9 @@ def oauth():
 
 @api.route("/callback", methods=["GET", "POST"])
 def callback():
-   
-    # print("callback")
     user = g.user
     if not user:
         return redirect(url_for("main.login"))
-    # print("user: ", user)
     if request.method == "POST":
         verification_code = request.form.get("verification_code")
         if not verification_code:
@@ -169,25 +169,23 @@ def callback():
         yahoo_consumer_key=os.getenv("YAHOO_CLIENT_ID"),
         yahoo_consumer_secret=os.getenv("YAHOO_CLIENT_SECRET"),
     )
-    
+
     curr_user_guid = query.get_current_user()._extracted_data["guid"]
     yahoo_access_token = query._yahoo_access_token_dict
     yahoo_access_token["guid"] = curr_user_guid
-    save_access_token(user["id"],yahoo_access_token)
-    gotten_token_after_save = get_access_token_by_user_id(user["id"])
-    print("gotten_token_after_save: \n",gotten_token_after_save,"\n")
-    # Update the user's GUID in the users table if it is currently null
-    user_id = user["id"]
+    try:
+        save_access_token(g.user_id, yahoo_access_token)
+    except ValueError as e:
+        flash(str(e))
+        return redirect(url_for("api.oauth"))
     return redirect(url_for("main.home"))
 
 
 @main.route("/home", methods=["GET", "POST"])
 def home():
 
-    # TODO does not get access token here because it doesn't get right guid, and that's how we were accessing access token.
     if g.access_token:
         yahoo_access_token = g.access_token
-        print("home", yahoo_access_token)
     else:
         return redirect(url_for("api.oauth"))
 
