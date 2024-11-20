@@ -1,0 +1,73 @@
+apiVersion: apps/v1 
+kind: StatefulSet
+metadata:
+  name: fantasyfootball-app-db
+  labels:
+    app: fantasyfootball-app-db
+spec:
+  selector:
+    matchLabels:
+      app: fantasyfootball-app-db
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: fantasyfootball-app-db
+    spec:
+      containers:
+        - image: docker.io/library/postgres:latest
+          name: db
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_PASSWORD
+              value: ${POSTGRES_PASSWORD}
+          livenessProbe:
+            tcpSocket:
+              port: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fantasyfootball-app-db
+spec:
+  selector:
+    app: fantasyfootball-app-db
+  ports:
+    - port: 5432
+---
+apiVersion: apps/v1 
+kind: Deployment
+metadata: 
+  name: fantasyfootball-app
+  labels: 
+    app: fantasyfootball-app
+spec: 
+  selector: 
+    matchLabels:
+      app: fantasyfootball-app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: fantasyfootball-app
+    spec:
+      containers:
+      - image: fantasyfootball-app:firsttry
+        imagePullPolicy: Never
+        name: fantasyfootball-app
+        ports:
+          - containerPort: 3000
+        env:
+          - name: APP_APPLICATION__HOST
+            value: 0.0.0.0
+          - name: FLASK_ENV
+            value: development
+          - name: POSTGRES_PASSWORD
+            value: ${POSTGRES_PASSWORD}
+          - name: POSTGRES_USER
+            value: postgres
+          - name: POSTGRES_HOST
+            value: db
+          - name: POSTGRES_DB
+            value: fantasy_football_db

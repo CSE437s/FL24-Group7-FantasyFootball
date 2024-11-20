@@ -9,6 +9,10 @@ import psycopg2
 from psycopg2 import pool
 from app.db import get_connection, release_connection, upsert_player_data
 import numpy as np
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
+
 
 # Define a Blueprint for the API routes
 api = Blueprint("api", __name__)
@@ -42,6 +46,7 @@ def auth():
     client_id = os.getenv("YAHOO_CLIENT_ID")
     client_secret = os.getenv("YAHOO_CLIENT_SECRET")
     response_type = "code"
+    print('hellothere')
     return redirect(
         f"https://api.login.yahoo.com/oauth2/request_auth?client_id={client_id}&client_secret={client_secret}&redirect_uri={redirect_uri}&response_type={response_type}"
     )
@@ -61,9 +66,7 @@ def callback():
         env_file_location=Path(""),
     )
 
-    query.save_access_token_data_to_env_file(
-        env_file_location=Path(""), save_json_to_var_only=True
-    )
+    
 
     return redirect(url_for("main.home"))
 
