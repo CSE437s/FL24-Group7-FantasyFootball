@@ -69,6 +69,7 @@ def extract_serializable_data(obj):
 
 @main.route("/register", methods=["GET", "POST"])
 def register():
+    print("register")
     if request.method == "POST":
         email = request.form.get("email")
         password = request.form.get("password")
@@ -91,8 +92,9 @@ def register():
         create_user(email, password)
         user = get_user_by_email(email)  # Retrieve the newly created user
         session["user_id"] = user["id"]
+        print(email)
+        print(password)
         return redirect(url_for("api.oauth"))
-
     return render_template("register.html")
 
 
@@ -132,24 +134,31 @@ def logout():
 
 @api.route("/oauth", methods=["GET", "POST"])
 def oauth():
-    user_id = g.user_id
-    if not user_id:
-        return redirect(url_for("main.login"))
-    access_token = g.access_token
+    print("oauth")
+    try:
+        user_id = g.user_id
+        print("user_id in oauth:",user_id)
+        if not user_id:
+            return redirect(url_for("main.login"))
+        access_token = g.access_token
+        print("access_token:",access_token)
+        # TODO I think this needs to be more robust haha, what if access_token is expired or access_token = 42 or something like that
+        if access_token is not None:
+            print("access_token in if statement that hits:",access_token)
 
-    # TODO I think this needs to be more robust haha, what if access_token is expired or access_token = 42 or something like that
-    if access_token is not None:
-        return redirect(url_for("main.home"))
-    else:
-        REDIRECT_URI = url_for("api.callback", _external=True)
-        CLIENT_ID = os.getenv("YAHOO_CLIENT_ID")
-        CLIENT_SECRET = os.getenv("YAHOO_CLIENT_SECRET")
-        RESPONSE_TYPE = "code"
+            return redirect(url_for("main.home"))
+        else:
+            print('else hits')
+            REDIRECT_URI = url_for("api.callback", _external=True)
+            CLIENT_ID = os.getenv("YAHOO_CLIENT_ID")
+            CLIENT_SECRET = os.getenv("YAHOO_CLIENT_SECRET")
+            RESPONSE_TYPE = "code"
 
-        auth_url = f"https://api.login.yahoo.com/oauth2/request_auth?client_id={CLIENT_ID}&client_secret={CLIENT_SECRET}&redirect_uri={REDIRECT_URI}&response_type={RESPONSE_TYPE}"
-        webbrowser.open_new_tab(auth_url)
-        return render_template("auth.html")
-
+            auth_url = f"https://api.login.yahoo.com/oauth2/request_auth?client_id={CLIENT_ID}&client_secret={CLIENT_SECRET}&redirect_uri={REDIRECT_URI}&response_type={RESPONSE_TYPE}"
+            return render_template("auth.html",auth_url=auth_url)
+    except Exception as e:
+        print("Error in oauth:", e)
+        return jsonify({"error": "Error in oauth"}), 400
 
 @api.route("/callback", methods=["GET", "POST"])
 def callback():

@@ -1,12 +1,6 @@
-<<<<<<< HEAD
-FROM python:3.9-slim
-
-WORKDIR /app
-=======
 FROM python:3.10-slim
 
 WORKDIR /fantasyfootball
->>>>>>> 148aaaf0a468599753bef524af42eb9d74055a51
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
@@ -15,8 +9,4 @@ COPY . .
 
 EXPOSE 3000
 
-<<<<<<< HEAD
-CMD ["python", "app/main.py"]
-=======
 CMD ["python", "run.py"]
->>>>>>> 148aaaf0a468599753bef524af42eb9d74055a51

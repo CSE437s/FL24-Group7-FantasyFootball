@@ -8,6 +8,7 @@ from .db import (
     get_user_by_id,
     get_access_token_by_user_id,
     create_users_table,
+    create_player_data_table,
 )
 from .routes import api, main
 from flask_session import Session  # Import Flask-Session extension
@@ -27,13 +28,15 @@ def create_app():
 
     create_access_tokens_table()
     create_users_table()
+    create_player_data_table()
 
-    @app.route("/")
-    def index():
-        return render_template("index.html")
+    # @app.route("/")
+    # def index():
+    #     return render_template("index.html")
 
     @app.before_request
     def middleware():
+        print(g.__str__())
         g.user_id = session.get("user_id")
         print("middleware g.user_id: ", g.user_id)
 
