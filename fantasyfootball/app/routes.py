@@ -105,7 +105,7 @@ def home():
             team_roster = team_info["roster"]
             for player in team_roster.players:
                 key = player.player_key
-                player_stats = query.get_player_stats_by_week(key,chosen_week=10)
+                player_stats = query.get_player_stats_by_week(key,chosen_week=11)
                 season_totals = query.get_player_stats_for_season(key)
                 # hard coded week for now
                 player_team_data.append(
@@ -149,10 +149,8 @@ def home():
 @main.route("/waiver-wire")
 def waiver_wire():
     try:
-        # Get the current page number and position filter from query parameters
-        page = request.args.get('page', 1, type=int)
+        # Get the position filter from query parameters
         position_filter = request.args.get('positionFilter', '', type=str)
-        per_page = 25  # Number of players per page
 
         # Get connection from the pool
         connection = get_connection()
@@ -161,18 +159,14 @@ def waiver_wire():
         # Modify SQL query based on position filter
         if position_filter:
             cursor.execute(
-                'SELECT "player_name", "primary_position", "image", "previous_performance", "bye", "status", "injury", "previous_week", "ppg", "total_points","team_abb" '
-                'FROM "player_data" '
-                'WHERE "primary_position" = %s '
-                'LIMIT %s OFFSET %s',
-                (position_filter, per_page, (page - 1) * per_page)
+                'SELECT "player_name", "primary_position", "image", "previous_performance", "bye", "status", "injury", "previous_week", "total_points", "team_abb", "season_totals" FROM "player_data" '
+                'WHERE "primary_position" = %s',
+                (position_filter,)
             )
         else:
             cursor.execute(
-                'SELECT "player_name", "primary_position", "image", "previous_performance", "bye", "status", "injury", "previous_week", "ppg", "total_points","team_abb" '
-                'FROM player_data '
-                'LIMIT %s OFFSET %s',
-                (per_page, (page - 1) * per_page)
+                'SELECT "player_name", "primary_position", "image", "previous_performance", "bye", "status", "injury", "previous_week", "total_points", "team_abb", "season_totals" '
+                'FROM "player_data"'
             )
 
         rows = cursor.fetchall()
@@ -180,32 +174,29 @@ def waiver_wire():
         # Convert rows to dictionary format
         waiver_wire_players = [
             {
-                "player_name": row[0],
-                "primary_position": row[1],
-                "bye": row[2],
-                "team_abb": row[3],
-                "image_url": row[4],
-                "status": row[5],
-                "injury": row[6],
-                "player_key": row[7]
+                'Player': row[0],
+                'Pos': row[1],
+                'img': row[2],
+                'previous_performance': row[3],
+                'bye': row[4],
+                'status': row[5],
+                'injury': row[6],
+                'previous_week': row[7],
+                'total_points': row[8],
+                'team_abb': row[9],
+                'season_totals': row[10]
             }
             for row in rows
         ]
-
-        # Calculate pagination
-        total = len(waiver_wire_players)
-        total_pages = (total + per_page - 1) // per_page  # Calculate total pages
 
         # Close cursor and release connection
         cursor.close()
         release_connection(connection)
 
-        # Render the waiver_wire template with paginated player data and filter info
+        # Render the waiver_wire template with player data and filter info
         return render_template(
             "waiver_wire.html",
             waiver_wire_players=waiver_wire_players,
-            page=page,
-            total_pages=total_pages,
             position_filter=position_filter
         )
 

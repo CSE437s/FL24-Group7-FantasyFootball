@@ -21,7 +21,7 @@
     {% if selected_team %}
     <h2>Analysis for {{ selected_team }}</h2>
     <div class="table-responsive">
-        <table class="table table-bordered table-striped">
+        <table id = "analyzer-table" class="table table-bordered table-striped">
             <thead>
                 <tr>
                     <th>Player</th>
@@ -99,8 +99,25 @@
 
 <!-- JavaScript for Info Icon Click Event -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 <script>
     $(document).ready(function() {
+
+        $('#analyzer-table').DataTable({
+            "order": [[4, "asc"]], // Sort by the 5th column (Ovr Grade) in ascending order
+            "searching": false, // Disable the search bar
+            "paging": false, // Disable pagination to show all entries
+            "info": false, // Disable the "Showing 1 to 15 of 15 entries" text
+            "columnDefs": [
+            { "orderable": true, "targets": "_all" } // Make all columns sortable
+            ]
+        });
+
+        // Add sorting arrows to the column headers
+        $('#analyzer-table thead th').each(function() {
+            $(this).append(' <i class="fas fa-sort"></i>');
+        });
         // Handle info icon click
         $('.info-icon').on('click', function(event) {
             event.preventDefault();  // Prevent default link behavior
@@ -112,7 +129,7 @@
             const playerTeam = $(this).data('player-team');
             const playerBye = $(this).data('player-bye');
             const playerRanking = $(this).data('player-ranking');
-            const playerStatus = $(this).data('player-status');
+            const playerStatus = $(this).data('player-status') || 'N/A';
             const playerInjury = $(this).data('player-injury') || 'N/A';
 
             // Populate the dashboard with player data
@@ -122,7 +139,11 @@
             document.getElementById("playerTeam").innerText = playerTeam;
             document.getElementById("byeWeek").innerText = playerBye;
             document.getElementById("playerRanking").innerText = playerRanking;
-            document.getElementById("injury").innerText =  playerInjury;
+            if (playerStatus === 'N/A') {
+                document.getElementById("injury").innerText = playerInjury;
+            } else {
+                document.getElementById("injury").innerText = playerStatus + ' - ' + playerInjury;
+            }
 
             // Display the modal
             $('#playerDashboard').show();
@@ -160,4 +181,3 @@
 </script>
 
 {% endblock %}
-
