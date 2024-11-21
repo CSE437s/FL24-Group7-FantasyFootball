@@ -170,7 +170,10 @@ def callback():
         if not verification_code:
             return jsonify({"error": "Missing verification code"}), 400
 
-        sys.stdin = StringIO(verification_code)
+        # # good for localhost
+        # sys.stdin = StringIO(verification_code)
+
+        ## for docker
 
     query = YahooFantasySportsQuery(
         league_id="<YAHOO_LEAGUE_ID>",
@@ -178,6 +181,7 @@ def callback():
         game_id=449,
         yahoo_consumer_key=os.getenv("YAHOO_CLIENT_ID"),
         yahoo_consumer_secret=os.getenv("YAHOO_CLIENT_SECRET"),
+        
     )
 
     curr_user_guid = query.get_current_user()._extracted_data["guid"]
