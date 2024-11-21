@@ -21,15 +21,14 @@
     {% if selected_team %}
     <h2>Analysis for {{ selected_team }}</h2>
     <div class="table-responsive">
-        <table class="table table-bordered table-striped">
+        <table id = "analyzer-table" class="table table-bordered table-striped">
             <thead>
                 <tr>
                     <th>Player</th>
+                    <th>Team</th>
                     <th>Position</th>
-                    <!-- <th>PPG</th>
                     <th>Total Points</th>
-                    <th>Consistency Grade</th>
-                    <th>Ovr Grade</th> -->
+                    <th>Ovr Grade</th> 
                 </tr>
             </thead>
             <tbody>
@@ -50,74 +49,75 @@
                             <i class="fas fa-info-circle"></i> <!-- Font Awesome info icon -->
                         </a>
                     </td>
+                    <td>{{player.team_abb}}</td>
                     <td>{{ player.Pos }}</td>
-                    <!-- <td>{{ player.ppg }}</td>
-                    <td>{{ player.total_points }}</td>
-                    <td>{{ player.std_dev }}</td>
-                    <td>{{ player.grade }}</td> -->
+                    <td>{{ player.season_totals }}</td>
+                    <td>{{ player.grade }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
-    <div class="position-scores">
-        <!-- <h2>Greatest strength:</h2>
-        <h3>Wide Receivers </h3>
-
-        <h2>Greatest weakness:</h2>
-        <h3>Running Backs </h3> -->
+  
+    <button id="showStrengthsWeaknesses" class="btn btn-secondary">Show Strengths and Weaknesses</button>
+    <div id="strengthsWeaknessesContainer" style="display: none;">
+        <button id="closeStrengthsWeaknesses" class="btn btn-danger">Close</button>
+        <h2>Greatest Strength:</h2>
+        <h3>{{ strengths }} ({{ strengths_grade }})</h3>
+        <h2>Greatest Weakness:</h2>
+        <h3>{{ weaknesses }} ({{ weaknesses_grade }})</h3>
     </div>
 
+    {% if ideal_lineup %}
+    <button id="findOptimalLineup" class="btn btn-primary">Find Optimal Lineup</button>
+    <div id="optimalLineupContainer" style="display: none;">
+        <button id="closeOptimalLineup" class="btn btn-danger">Close</button>
+        <h2>Optimal Lineup for Week 11</h2>
+        <ul style="list-style-type: none; padding: 0;">
+            <ul style="font-size: 1.2em; margin: 10px 0;"><strong>QB:</strong> {{ ideal_lineup.QB }}</ul>
+            <ul style="font-size: 1.2em; margin: 10px 0;"><strong>RB:</strong> {{ ideal_lineup.RB1 }}</ul>
+            <ul style="font-size: 1.2em; margin: 10px 0;"><strong>RB:</strong> {{ ideal_lineup.RB2 }}</ul>
+            <ul style="font-size: 1.2em; margin: 10px 0;"><strong>WR:</strong> {{ ideal_lineup.WR1 }}</ul>
+            <ul style="font-size: 1.2em; margin: 10px 0;"><strong>WR:</strong> {{ ideal_lineup.WR2 }}</ul>
+            <ul style="font-size: 1.2em; margin: 10px 0;"><strong>TE:</strong> {{ ideal_lineup.TE }}</ul>
+            <ul style="font-size: 1.2em; margin: 10px 0;"><strong>FLEX:</strong> {{ ideal_lineup.FLEX }}</ul>
+            <ul style="font-size: 1.2em; margin: 10px 0;"><strong>K:</strong> {{ ideal_lineup.K }}</ul>
+            <ul style="font-size: 1.2em; margin: 10px 0;"><strong>DST:</strong> {{ ideal_lineup.DST }}</ul>
+        </ul>
+    </div>
+    {% endif %}
 
-    <!-- <div class="optimal-lineup">
-        <h2>Optimal Lineup for Week _</h2>
-        <h4>QB:</h4>
-        <h4>RB:</h4>
-        <h4>RB:</h4>
-        <h4>WR:</h4>
-        <h4>WR:</h4>
-        <h4>FLEX:</h4>
-        <h4>DST:</h4>
-        <h4>K:</h4>
-    </div> -->
     {% endif %}
 
     
     
 </div>
 
-<!-- Player Info Dashboard Modal -->
-<!-- <div id="playerDashboard" class="modal" style="display: none;">
-    <div class="modal-content">
-        <span id="closeDashboard" class="close">&times;</span>
-        <h3 id="dashboardPlayerName"></h3>
-        <p id="dashboardPlayerPosition"></p>
-
-       
-        <div class="dashboard-section">
-            <h4>Recent Performance</h4>
-            <ul id="recentPerformance"></ul> 
-        </div>
-
-        <div class="dashboard-section">
-            <h4>Projected Points</h4>
-            <p id="projectedPoints">Loading...</p>
-        </div>
-
-        <div class="dashboard-section">
-            <h4>Matchup Analysis</h4>
-            <p id="matchupAnalysis">Loading...</p>
-        </div>
-    </div>
-</div> -->
 
 <!-- Font Awesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
 <!-- JavaScript for Info Icon Click Event -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 <script>
     $(document).ready(function() {
+
+        $('#analyzer-table').DataTable({
+            "order": [[4, "asc"]], // Sort by the 5th column (Ovr Grade) in ascending order
+            "searching": false, // Disable the search bar
+            "paging": false, // Disable pagination to show all entries
+            "info": false, // Disable the "Showing 1 to 15 of 15 entries" text
+            "columnDefs": [
+            { "orderable": true, "targets": "_all" } // Make all columns sortable
+            ]
+        });
+
+        // Add sorting arrows to the column headers
+        $('#analyzer-table thead th').each(function() {
+            $(this).append(' <i class="fas fa-sort"></i>');
+        });
         // Handle info icon click
         $('.info-icon').on('click', function(event) {
             event.preventDefault();  // Prevent default link behavior
@@ -129,7 +129,7 @@
             const playerTeam = $(this).data('player-team');
             const playerBye = $(this).data('player-bye');
             const playerRanking = $(this).data('player-ranking');
-            const playerStatus = $(this).data('player-status');
+            const playerStatus = $(this).data('player-status') || 'N/A';
             const playerInjury = $(this).data('player-injury') || 'N/A';
 
             // Populate the dashboard with player data
@@ -139,7 +139,11 @@
             document.getElementById("playerTeam").innerText = playerTeam;
             document.getElementById("byeWeek").innerText = playerBye;
             document.getElementById("playerRanking").innerText = playerRanking;
-            document.getElementById("injury").innerText =  playerInjury;
+            if (playerStatus === 'N/A') {
+                document.getElementById("injury").innerText = playerInjury;
+            } else {
+                document.getElementById("injury").innerText = playerStatus + ' - ' + playerInjury;
+            }
 
             // Display the modal
             $('#playerDashboard').show();
@@ -150,130 +154,30 @@
             $('#playerDashboard').hide();
         });
 
+        document.getElementById("findOptimalLineup").addEventListener("click", function() {
+            document.getElementById("optimalLineupContainer").style.display = "block";
+        });
+
+        document.getElementById("showStrengthsWeaknesses").addEventListener("click", function() {
+            document.getElementById("strengthsWeaknessesContainer").style.display = "block";
+        });
+
+        document.getElementById("closeOptimalLineup").addEventListener("click", function() {
+            document.getElementById("optimalLineupContainer").style.display = "none";
+        });
+
+        document.getElementById("closeStrengthsWeaknesses").addEventListener("click", function() {
+            document.getElementById("strengthsWeaknessesContainer").style.display = "none";
+        });
+
         // Close the dashboard when clicking outside of the modal content
         $(window).on('click', function(event) {
             if ($(event.target).is('#playerDashboard')) {
                 $('#playerDashboard').hide();
             }
         });
+        
     });
 </script>
 
-<style>
-    /* Add your CSS styles for the modal here */
-    .modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.7);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .modal-content {
-        background-color: #fff;
-        padding: 20px;
-        width: 400px;
-        border-radius: 8px;
-        text-align: center;
-        position: relative; /* Added to position close button */
-    }
-
-    .close {
-        position: absolute;
-        top: 10px;
-        right: 20px;
-        cursor: pointer;
-        font-size: 1.5em;
-        color: #333; /* Added color to close button */
-    }
-
-    .close:hover {
-        color: #ff0000; /* Change color on hover */
-    }
-
-    /*
-Analysis:
-
-Columns:
-
-
-Player Name (i)
-Player Team
-Player Position
-Upcoming Matchup (team playing against current week)
-Projected points
-
-
-
-Analysis:
-1. Outperforming projections - has outperformed projections in x/y weeks
-2. Defense database - facing top 10 defense in fantasy vs position
-3. Injury Status
-
-** Lineup Optimizer**
-Use projected points - but our own adjustments. Potential adjustments:
---> home game
---> on a good team
---> opp def rank against position
---> recent hot streak (did outperform last week = boost)
---> off a bye week (more rest)
---> consistent performers
-
-our_projections = {}
-
-for player in team_roster:
-    projection = player.proj_points
-
-    // check home
-    if home == true:
-        projection = projection * 1.05
-    
-    if good_team:
-        projection = projection * 1.05
-
-    if opp_rank against receiver in bottom 10:
-        projection = projection * 0.95
-
-    if opp_rank against receiver in top 10:
-        projection = projection * 1.05
-    
-    if outperfomed last week:
-        projection = projection * 1.05
-
-    if bye was last week:
-        projection = projection * 1.05
-    
-    if consistent:
-        projection = projection * 1.05
-
-    our_projections[player] = projection
-
-
-
-
-
-
-Assume:
-QB
-RB
-RB
-WR
-WR
-TE
-DEF
-K
-
-
-
-
-
-
-*/
-</style>
-
 {% endblock %}
-

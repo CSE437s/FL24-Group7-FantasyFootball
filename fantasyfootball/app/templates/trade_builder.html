@@ -39,7 +39,7 @@
                                 data-player-headshot="{{ player.img }}" 
                                 data-player-bye="{{ player.bye }}" 
                                 data-player-ranking="{{ player.previous_performance }}" 
-                                data-player-status="{{ player.status }}" 
+                                data-status="{{ player.status }}" 
                                 data-player-injury="{{ player.injury }}" 
                                 data-player-team="{{ player.team_abb }}">{{ player.Player }} ({{ player.Pos }})</option>
                             {% endfor %}
@@ -198,7 +198,13 @@ $(document).ready(function() {
         document.getElementById("playerTeam").innerText = playerData.playerTeam;
         document.getElementById("byeWeek").innerText = playerData.playerBye;
         document.getElementById("playerRanking").innerText = playerData.playerRanking;
-        document.getElementById("injury").innerText = playerData.playerInjury || 'N/A';;
+        const playerStatus = playerData.playerStatus || "None";
+        const playerInjury = playerData.playerInjury || "None";
+        if (playerStatus === "None" && playerInjury === "None") {
+                document.getElementById("injury").innerText = "N/A";
+            } else {
+                document.getElementById("injury").innerText = playerStatus + " - " + playerInjury;
+            }
         // Display the modal
         $('#playerDashboard').show();
     });
