@@ -1,4 +1,13 @@
-from flask import Blueprint, jsonify, request, redirect, url_for
+# /app/routes.py
+from flask import (
+    Blueprint,
+    jsonify,
+    request,
+    redirect,
+    url_for,
+    session,
+    flash,
+)
 import os
 from yfpy.query import YahooFantasySportsQuery
 from pathlib import Path
@@ -7,12 +16,34 @@ import json
 import pandas as pd
 import psycopg2
 from psycopg2 import pool
-from app.db import get_connection, release_connection, upsert_player_data
+from app.db import (
+    get_connection,
+    release_connection,
+    save_access_token,
+    get_access_token_by_guid,
+    create_user,
+    get_user_by_email,
+    get_user_by_id,
+    verify_password,
+    update_user_guid,  # Import the new function
+    get_access_token_by_user_id,
+    upsert_player_data,
+)
 import numpy as np
+from dotenv import load_dotenv
+import webbrowser
+import sys
+from io import StringIO
+from flask import g
+
+
+load_dotenv(override=True)
+
 
 # Define a Blueprint for the API routes
 api = Blueprint("api", __name__)
 main = Blueprint("main", __name__)
+
 
 def extract_serializable_data(obj):
     # If the object has '_extracted_data', use it
@@ -35,22 +66,119 @@ def extract_serializable_data(obj):
     else:
         return str(obj)  # Convert to string as a last resort
 
-@api.route("/auth", methods=["GET"])
-def auth():
 
-    redirect_uri = os.getenv("REDIRECT_URI")
-    client_id = os.getenv("YAHOO_CLIENT_ID")
-    client_secret = os.getenv("YAHOO_CLIENT_SECRET")
-    response_type = "code"
-    return redirect(
-        f"https://api.login.yahoo.com/oauth2/request_auth?client_id={client_id}&client_secret={client_secret}&redirect_uri={redirect_uri}&response_type={response_type}"
-    )
+@main.route("/register", methods=["GET", "POST"])
+def register():
+    print("register")
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+        if not email or not password:
+            return jsonify({"error": "Missing email or password"}), 400
 
-@api.route("/callback", methods=["GET"])
+        user = get_user_by_email(email)
+        if user:
+            # If the email exists, check if the password matches
+            if verify_password(user["password"], password):
+                # If the password matches, treat it as a login
+                session["user_id"] = user["id"]
+                return redirect(url_for("main.home"))
+            else:
+                return (
+                    jsonify({"error": "User already exists with a different password"}),
+                    400,
+                )
+
+        create_user(email, password)
+        user = get_user_by_email(email)  # Retrieve the newly created user
+        session["user_id"] = user["id"]
+        print(email)
+        print(password)
+        return redirect(url_for("api.oauth"))
+    return render_template("register.html")
+
+
+@main.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+        if not email or not password:
+            return jsonify({"error": "Missing email or password"}), 400
+
+        user = get_user_by_email(email)
+        if not user or not verify_password(user["password"], password):
+            return jsonify({"error": "Invalid email or password"}), 400
+
+        session["user_id"] = user["id"]
+        return redirect(url_for("main.home"))
+
+    return render_template("login.html")
+
+
+@main.route("/logout", methods=["GET", "POST"])
+def logout():
+    if request.method == "POST":
+        # Clear session and pop all keys from g
+        session.clear()
+        keys = g.__dict__.keys()
+
+        for key in list(keys):
+            g.pop(key)
+
+        # Redirect to Yahoo's logout page
+        return render_template("logout.html")
+    # return redirect(f"https://login.yahoo.com/config/login?logout=1&.direct=1&.done={url_for('index', _external=True)}")
+    return render_template("confirm_logout.html")
+
+
+@api.route("/oauth", methods=["GET", "POST"])
+def oauth():
+    print("oauth")
+    try:
+        user_id = g.user_id
+        print("user_id in oauth:", user_id)
+        if not user_id:
+            return redirect(url_for("main.login"))
+        access_token = g.access_token
+        print("access_token:", access_token)
+        # TODO I think this needs to be more robust haha, what if access_token is expired or access_token = 42 or something like that
+        if access_token is not None:
+            print("access_token in if statement that hits:", access_token)
+
+            return redirect(url_for("main.home"))
+        else:
+            print("else hits")
+            REDIRECT_URI = url_for("api.callback", _external=True)
+            CLIENT_ID = os.getenv("YAHOO_CLIENT_ID")
+            CLIENT_SECRET = os.getenv("YAHOO_CLIENT_SECRET")
+            RESPONSE_TYPE = "code"
+
+            auth_url = f"https://api.login.yahoo.com/oauth2/request_auth?client_id={CLIENT_ID}&client_secret={CLIENT_SECRET}&redirect_uri={REDIRECT_URI}&response_type={RESPONSE_TYPE}"
+            webbrowser.open_new_tab(auth_url)
+            return render_template(
+                "auth.html",
+                # auth_url=auth_url,
+            )
+    except Exception as e:
+        print("Error in oauth:", e)
+        return jsonify({"error": "Error in oauth"}), 400
+
+
+@api.route("/callback", methods=["GET", "POST"])
 def callback():
-    code = request.args.get("code")
-    if not code:
-        return jsonify({"error": "Missing authorization code"}), 400
+    user = g.user
+    if not user:
+        return redirect(url_for("main.login"))
+    if request.method == "POST":
+        verification_code = request.form.get("verification_code")
+        if not verification_code:
+            return jsonify({"error": "Missing verification code"}), 400
+
+        # # good for localhost
+        sys.stdin = StringIO(verification_code)
+
+        ## for docker
 
     query = YahooFantasySportsQuery(
         league_id="<YAHOO_LEAGUE_ID>",
@@ -58,25 +186,38 @@ def callback():
         game_id=449,
         yahoo_consumer_key=os.getenv("YAHOO_CLIENT_ID"),
         yahoo_consumer_secret=os.getenv("YAHOO_CLIENT_SECRET"),
-        env_file_location=Path(""),
     )
 
-    query.save_access_token_data_to_env_file(
-        env_file_location=Path(""), save_json_to_var_only=True
-    )
+    curr_user_guid = query.get_current_user()._extracted_data["guid"]
+    yahoo_access_token = query._yahoo_access_token_dict
+    yahoo_access_token["guid"] = curr_user_guid
+    update_user_guid(user["id"], curr_user_guid)
+    try:
+        save_access_token(g.user_id, yahoo_access_token)
 
+    except ValueError as e:
+        flash(str(e))
+        return redirect(url_for("api.oauth"))
     return redirect(url_for("main.home"))
 
 
 @main.route("/home", methods=["GET", "POST"])
 def home():
+
+    if g.access_token:
+        yahoo_access_token = g.access_token
+    else:
+        return redirect(url_for("api.oauth"))
+
+    user_id = g.user_id
+    user = get_user_by_id(user_id)
+    user_guid = user["guid"]
+
     query = YahooFantasySportsQuery(
         league_id="<YAHOO_LEAGUE_ID>",
         game_code="nfl",
         game_id=449,
-        yahoo_consumer_key=os.getenv("YAHOO_CLIENT_ID"),
-        yahoo_consumer_secret=os.getenv("YAHOO_CLIENT_SECRET"),
-        env_file_location=Path(""),
+        yahoo_access_token_json=yahoo_access_token,
     )
     # curr_user_team = query.get_current_user()._extracted_data["guid"]
     leagues = query.get_user_leagues_by_game_key(449)
@@ -85,27 +226,25 @@ def home():
         if isinstance(league.name, bytes):
             league.name = league.name.decode("utf-8")
 
-
     if request.method == "POST":
         selected_league_id = request.form.get("league_id")
+        session["selected_league_id"] = selected_league_id
         query = YahooFantasySportsQuery(
             league_id=selected_league_id,
             game_code="nfl",
             game_id=449,
-            yahoo_consumer_key=os.getenv("YAHOO_CLIENT_ID"),
-            yahoo_consumer_secret=os.getenv("YAHOO_CLIENT_SECRET"),
-            env_file_location=Path(""),
+            yahoo_access_token_json=yahoo_access_token,
         )
 
         player_team_data = []
         league_teams = query.get_league_teams()
-        
+
         for team in league_teams:
             team_info = query.get_team_info(team.team_id)._extracted_data
             team_roster = team_info["roster"]
             for player in team_roster.players:
                 key = player.player_key
-                player_stats = query.get_player_stats_by_week(key,chosen_week=11)
+                player_stats = query.get_player_stats_by_week(key, chosen_week=11)
                 season_totals = query.get_player_stats_for_season(key)
                 # hard coded week for now
                 player_team_data.append(
@@ -123,13 +262,18 @@ def home():
                         "previous_performance": player_stats.player_points.total,
                         "games_played": player_stats.player_stats.stats[0].value,
                         "total_points": player_stats.player_points.total,
-                        "ppg": (player_stats.player_points.total / player_stats.player_stats.stats[0].value
-                                if player_stats.player_stats.stats[0].value != 0 else 0)
+                        "ppg": (
+                            player_stats.player_points.total
+                            / player_stats.player_stats.stats[0].value
+                            if player_stats.player_stats.stats[0].value != 0
+                            else 0
+                        ),
+                    }
+                )
 
-                    })
-
-                player_team_data[-1]["season_totals"] = season_totals.player_points.total
-    
+                player_team_data[-1][
+                    "season_totals"
+                ] = season_totals.player_points.total
 
         upsert_player_data(player_team_data)
 
@@ -150,7 +294,7 @@ def home():
 def waiver_wire():
     try:
         # Get the position filter from query parameters
-        position_filter = request.args.get('positionFilter', '', type=str)
+        position_filter = request.args.get("positionFilter", "", type=str)
 
         # Get connection from the pool
         connection = get_connection()
@@ -161,7 +305,7 @@ def waiver_wire():
             cursor.execute(
                 'SELECT "player_name", "primary_position", "image", "previous_performance", "bye", "status", "injury", "previous_week", "total_points", "team_abb", "season_totals" FROM "player_data" '
                 'WHERE "primary_position" = %s',
-                (position_filter,)
+                (position_filter,),
             )
         else:
             cursor.execute(
@@ -174,17 +318,17 @@ def waiver_wire():
         # Convert rows to dictionary format
         waiver_wire_players = [
             {
-                'Player': row[0],
-                'Pos': row[1],
-                'img': row[2],
-                'previous_performance': row[3],
-                'bye': row[4],
-                'status': row[5],
-                'injury': row[6],
-                'previous_week': row[7],
-                'total_points': row[8],
-                'team_abb': row[9],
-                'season_totals': row[10]
+                "Player": row[0],
+                "Pos": row[1],
+                "img": row[2],
+                "previous_performance": row[3],
+                "bye": row[4],
+                "status": row[5],
+                "injury": row[6],
+                "previous_week": row[7],
+                "total_points": row[8],
+                "team_abb": row[9],
+                "season_totals": row[10],
             }
             for row in rows
         ]
@@ -197,13 +341,12 @@ def waiver_wire():
         return render_template(
             "waiver_wire.html",
             waiver_wire_players=waiver_wire_players,
-            position_filter=position_filter
+            position_filter=position_filter,
         )
 
     except Exception as error:
         print("Error fetching waiver wire data:", error)
         return "Error loading waiver wire", 500
-
 
 
 def analyze_player(player_data):
@@ -359,7 +502,6 @@ def analyze_player(player_data):
         return "F"
 
 
-
 def topQB(players):
     current_week = 1 + players[0].get("previous_week", 0) if players else 0
     optimal_qb = None
@@ -376,7 +518,6 @@ def topQB(players):
                 optimal_qb = player.get("Player", "")
 
     return optimal_qb
-    
 
 
 def topRBs(players):
@@ -398,6 +539,7 @@ def topRBs(players):
 
     return tuple(optimal_rbs)
 
+
 def topWRs(players):
     current_week = 1 + players[0].get("previous_week", 0) if players else 0
     optimal_wrs = []
@@ -417,6 +559,7 @@ def topWRs(players):
 
     return tuple(optimal_wrs)
 
+
 def topTE(players):
     current_week = 1 + players[0].get("previous_week", 0) if players else 0
     optimal_te = None
@@ -433,6 +576,7 @@ def topTE(players):
                 optimal_te = player.get("Player", "")
 
     return optimal_te
+
 
 def topFLEX(players, rbs, wrs, te):
     current_week = 1 + players[0].get("previous_week", 0) if players else 0
@@ -454,6 +598,7 @@ def topFLEX(players, rbs, wrs, te):
 
     return optimal_flex
 
+
 def topK(players):
     current_week = 1 + players[0].get("previous_week", 0) if players else 0
     optimal_k = None
@@ -470,6 +615,7 @@ def topK(players):
                 optimal_k = player.get("Player", "")
 
     return optimal_k
+
 
 def topDst(players):
     current_week = 1 + players[0].get("previous_week", 0) if players else 0
@@ -488,16 +634,26 @@ def topDst(players):
 
     return optimal_dst
 
+
 def grade_to_numeric(grade):
     """Convert a grade to a numeric value for averaging."""
     grade_mapping = {
-        "A+": 4.3, "A": 4.0, "A-": 3.7,
-        "B+": 3.3, "B": 3.0, "B-": 2.7,
-        "C+": 2.3, "C": 2.0, "C-": 1.7,
-        "D+": 1.3, "D": 1.0, "D-": 0.7,
-        "F": 0.0
+        "A+": 4.3,
+        "A": 4.0,
+        "A-": 3.7,
+        "B+": 3.3,
+        "B": 3.0,
+        "B-": 2.7,
+        "C+": 2.3,
+        "C": 2.0,
+        "C-": 1.7,
+        "D+": 1.3,
+        "D": 1.0,
+        "D-": 0.7,
+        "F": 0.0,
     }
     return grade_mapping.get(grade, 0.0)
+
 
 def numeric_to_grade(numeric):
     """Convert a numeric value back to a grade."""
@@ -528,7 +684,8 @@ def numeric_to_grade(numeric):
     else:
         return "F"
 
-@main.route('/team-analyzer', methods=['GET', 'POST'])
+
+@main.route("/team-analyzer", methods=["GET", "POST"])
 def team_analyzer():
     try:
         connection = get_connection()
@@ -548,37 +705,40 @@ def team_analyzer():
         weaknesses = None
         weaknesses_grade = None
 
-        if request.method == 'POST':
-            selected_team = request.form.get('team')
+        if request.method == "POST":
+            selected_team = request.form.get("team")
             connection = get_connection()
             cursor = connection.cursor()
-            cursor.execute('SELECT "player_name", "primary_position", "image", "previous_performance", "bye", "status", "injury", "previous_week", "total_points", "team_abb", "season_totals" FROM "player_data" WHERE "team_name" = %s', (selected_team,))
+            cursor.execute(
+                'SELECT "player_name", "primary_position", "image", "previous_performance", "bye", "status", "injury", "previous_week", "total_points", "team_abb", "season_totals" FROM "player_data" WHERE "team_name" = %s',
+                (selected_team,),
+            )
             team_players = cursor.fetchall()
             cursor.close()
             release_connection(connection)
 
             for player in team_players:
                 player_data = {
-                    'Player': player[0],
-                    'Pos': player[1],
-                    'img': player[2],
-                    'previous_performance': player[3],
-                    'bye': player[4],
-                    'status': player[5],
-                    'injury': player[6],
-                    'previous_week': player[7],
-                    'total_points': player[8],
-                    'team_abb': player[9],
-                    'season_totals': player[10]
+                    "Player": player[0],
+                    "Pos": player[1],
+                    "img": player[2],
+                    "previous_performance": player[3],
+                    "bye": player[4],
+                    "status": player[5],
+                    "injury": player[6],
+                    "previous_week": player[7],
+                    "total_points": player[8],
+                    "team_abb": player[9],
+                    "season_totals": player[10],
                 }
-                player_data['grade'] = analyze_player(player_data)
+                player_data["grade"] = analyze_player(player_data)
                 players.append(player_data)
 
                 # Collect grades for each position
-                pos = player_data['Pos']
+                pos = player_data["Pos"]
                 if pos not in position_grades:
                     position_grades[pos] = []
-                position_grades[pos].append(grade_to_numeric(player_data['grade']))
+                position_grades[pos].append(grade_to_numeric(player_data["grade"]))
 
             # Calculate top players for each position
             qb = topQB(players)
@@ -598,21 +758,23 @@ def team_analyzer():
                 "TE": te,
                 "FLEX": flex,
                 "K": k,
-                "DST": dst
+                "DST": dst,
             }
 
-            min_depth = {
-                "QB": 1,
-                "RB": 2,
-                "WR": 2,
-                "TE": 1,
-                "FLEX": 1
-            }
+            min_depth = {"QB": 1, "RB": 2, "WR": 2, "TE": 1, "FLEX": 1}
 
             # Calculate average grades for each position
-            filtered_position_grades = {pos: grades for pos, grades in position_grades.items() if pos not in ["K", "DEF"] and len(grades) >= min_depth.get(pos, 0)}
+            filtered_position_grades = {
+                pos: grades
+                for pos, grades in position_grades.items()
+                if pos not in ["K", "DEF"] and len(grades) >= min_depth.get(pos, 0)
+            }
             if filtered_position_grades:
-                avg_grades = {pos: (sum(grades) / len(grades)) + (0.2 * (len(grades) - min_depth.get(pos, 0))) for pos, grades in filtered_position_grades.items()}
+                avg_grades = {
+                    pos: (sum(grades) / len(grades))
+                    + (0.2 * (len(grades) - min_depth.get(pos, 0)))
+                    for pos, grades in filtered_position_grades.items()
+                }
                 strengths = max(avg_grades, key=avg_grades.get)
                 weaknesses = min(avg_grades, key=avg_grades.get)
 
@@ -624,17 +786,27 @@ def team_analyzer():
                 weaknesses = "N/A"
                 weaknesses_grade = "N/A"
 
-
-        return render_template('team_analyzer.html', teams=teams, selected_team=selected_team, players=players, ideal_lineup=ideal_lineup, strengths=strengths, strengths_grade=strengths_grade, weaknesses=weaknesses, weaknesses_grade=weaknesses_grade)
+        return render_template(
+            "team_analyzer.html",
+            teams=teams,
+            selected_team=selected_team,
+            players=players,
+            ideal_lineup=ideal_lineup,
+            strengths=strengths,
+            strengths_grade=strengths_grade,
+            weaknesses=weaknesses,
+            weaknesses_grade=weaknesses_grade,
+        )
     except Exception as e:
         print(f"Error fetching team analyzer data: {e}")
-        return render_template('error.html', error_message=str(e))
-    
-
+        return render_template("error.html", error_message=str(e))
 
 
 @main.route("/trade-builder", methods=["GET", "POST"])
 def trade_builder():
+
+    curr_user = g.user_id
+
     connection = get_connection()
     cursor = connection.cursor()
 
@@ -679,38 +851,38 @@ def trade_builder():
 
             for player in team1_roster:
                 team1_info = {
-                    'Player': player[0],
-                    'Pos': player[1],
-                    'img': player[2],
-                    'previous_performance': player[3],
-                    'team_name': player[4],
-                    'bye': player[5],
-                    'status': player[6],
-                    'injury': player[7],
-                    'player_key': player[8],
-                    'previous_week': player[9],
-                    'ppg': player[10],
-                    'total_points': player[11],
-                    'team_abb': player[12]
+                    "Player": player[0],
+                    "Pos": player[1],
+                    "img": player[2],
+                    "previous_performance": player[3],
+                    "team_name": player[4],
+                    "bye": player[5],
+                    "status": player[6],
+                    "injury": player[7],
+                    "player_key": player[8],
+                    "previous_week": player[9],
+                    "ppg": player[10],
+                    "total_points": player[11],
+                    "team_abb": player[12],
                 }
                 team1_roster_info.append(team1_info)
 
             # Process team 2 roster
             for player in team2_roster:
                 team2_info = {
-                    'Player': player[0],
-                    'Pos': player[1],
-                    'img': player[2],
-                    'previous_performance': player[3],
-                    'team_name': player[4],
-                    'bye': player[5],
-                    'status': player[6],
-                    'injury': player[7],
-                    'player_key': player[8],
-                    'previous_week': player[9],
-                    'ppg': player[10],
-                    'total_points': player[11],
-                    'team_abb': player[12]
+                    "Player": player[0],
+                    "Pos": player[1],
+                    "img": player[2],
+                    "previous_performance": player[3],
+                    "team_name": player[4],
+                    "bye": player[5],
+                    "status": player[6],
+                    "injury": player[7],
+                    "player_key": player[8],
+                    "previous_week": player[9],
+                    "ppg": player[10],
+                    "total_points": player[11],
+                    "team_abb": player[12],
                 }
                 team2_roster_info.append(team2_info)
 
@@ -721,9 +893,7 @@ def trade_builder():
         if request.form.get("your_player") and request.form.get("target_player"):
             your_player = request.form.get("your_player")
             target_player = request.form.get("target_player")
-            trade_feedback = f'You proposed trading {your_player} for {target_player}.'
-
-
+            trade_feedback = f"You proposed trading {your_player} for {target_player}."
 
     return render_template(
         "trade_builder.html",

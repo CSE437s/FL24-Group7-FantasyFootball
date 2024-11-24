@@ -8,7 +8,7 @@ services:
     ports:
       - "3000:3000"  # Map container port 3000 to localhost port 3000
     volumes:
-      - .:/app  # Mount current directory to /app in the container
+      - .:/fantasyfootball  # Mount current directory to /app in the container
     environment:
       FLASK_ENV: development  # Set Flask environment to development
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}  # Define database password in the app's environment
@@ -26,3 +26,4 @@ services:
       POSTGRES_DB: fantasy_football_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+

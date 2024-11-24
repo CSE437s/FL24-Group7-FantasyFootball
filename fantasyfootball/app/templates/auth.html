@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Authenticate with Yahoo</h2>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul class="flashes">
+    {% for message in messages %}
+    <div class="flash error">{{message}}
+        <a href="{{ url_for('main.register') }}"> Register with a different yahoo
+            account
+        </a>
+    </div>
+
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+<script>
+    window.location.href("{{ auth_url }}", "_blank");
+</script>
+{{auth_url}}
+<form method="post" action="{{ url_for('api.callback') }}">
+    <label for="verification_code">Enter Verification Code:</label>
+    <input type="text" id="verification_code" name="verification_code" required>
+    <button type="submit">Verify</button>
+</form>
+
+{% endblock %}

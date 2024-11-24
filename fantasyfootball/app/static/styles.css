@@ -1,5 +1,3 @@
-/* styles.css */
-
 /* General Styles */
 body {
     font-family: Arial, sans-serif;
@@ -16,30 +14,41 @@ body {
     background: white;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    text-align: center; /* Center text in container */
+    text-align: center;
+}
+
+h1,
+h2,
+h3 {
+    margin: 20px 0;
+    text-align: center;
 }
 
 header {
     background-color: #333;
     color: white;
     padding: 10px 0;
-    text-align: center; /* Center header text */
+    text-align: center;
+    /* Center header text */
 }
 
 h1 {
-    margin: 0 0 20px;
-    font-size: 2.5em; /* Larger heading */
+    font-size: 2.5em;
 }
 
 h2 {
-    margin: 20px 0;
-    font-size: 1.8em; /* Subheading size */
-    color: #3f51b5; /* Header color */
+    font-size: 1.8em;
+    color: #3f51b5;
 }
 
 h3 {
+    font-size: 1.5em;
     margin: 10px 0;
-    font-size: 1.5em; /* Smaller subheading size */
+}
+
+/* Header */
+header {
+    background-color: #007bff;
 }
 
 footer {
@@ -51,11 +60,13 @@ footer {
     width: 100%;
     bottom: 0;
     display: none;
-    font-size: 0.9em; /* Smaller font size for footer */
+    font-size: 0.9em;
+    /* Smaller font size for footer */
 }
 
 /* List Styles */
-.leagues, .waiver-wire {
+.leagues,
+.waiver-wire {
     margin: 20px;
     padding: 20px;
     background-color: white;
@@ -69,7 +80,8 @@ footer {
 }
 
 .leagues li {
-    background: #f9f9f9; /* Light background for list items */
+    background: #f9f9f9;
+    /* Light background for list items */
     margin-bottom: 10px;
     padding: 10px;
     border-radius: 5px;
@@ -85,51 +97,115 @@ footer {
     padding: 10px 15px;
     text-decoration: none;
     color: white;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    font-size: 1em; /* Button text size */
+    padding: 10px 0;
+    text-align: center;
 }
 
-.button.primary {
-    background-color: #1976d2; /* Primary button color */
+
+/* Navbar styling */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #007bff;
+}
+
+/* Left, Center, and Right Alignment */
+.nav-home {
+    flex: 1;
+    text-align: left;
+}
+
+.nav-features {
+    display: flex;
+    gap: 20px;
+    /* Spacing between feature links */
+    justify-content: center;
+    flex: 2;
+}
+
+.nav-logout-login-register {
+    flex: 1;
+    text-align: right;
+}
+
+/* Link styling */
+.navbar a {
+    color: white;
+    text-decoration: none;
+    padding: 10px;
+}
+
+.navbar a:hover {
+    background-color: #0056b3;
+    border-radius: 4px;
+    transition: color 0.25s;
+}
+
+/* Buttons */
+.button,
+button {
+    display: inline-block;
+    width: calc(33% - 20px);
+    /* Fit three buttons side by side with margin */
+    padding: 10px;
+    margin: 10px;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    background-color: #007bff;
+    transition: background-color 0.3s;
+}
+
+.button:hover,
+button:hover {
+    background-color: #0056b3;
 }
 
 .button.secondary {
-    background-color: #9c27b0; /* Secondary button color */
+    background-color: #9c27b0;
 }
 
 .button.success {
-    background-color: #4caf50; /* Success button color */
-}
-
-.button:hover {
-    background-color: #0056b3; /* Darker shade on hover for primary button */
+    background-color: #4caf50;
 }
 
 /* Form Styles */
 form {
+    max-width: 400px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     gap: 15px;
-    max-width: 400px;
-    margin: 20px auto; /* Center form */
-    padding: 20px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-label, select {
-    font-size: 16px;
+label {
+    display: block;
+    margin-bottom: 5px;
 }
 
+input[type="email"],
+input[type="password"],
+input[type="text"],
 select {
     width: 100%;
     padding: 10px;
-    border: 1px solid #ccc; /* Light gray border */
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    /* Light gray border */
     border-radius: 5px;
-    margin-bottom: 20px; /* Space below select */
+    margin-bottom: 20px;
+    /* Space below select */
 }
 
 /* Table Styles */
@@ -142,7 +218,8 @@ table {
     border-collapse: collapse;
 }
 
-th, td {
+th,
+td {
     padding: 8px 12px;
     border: 1px solid #ddd;
     text-align: left;
@@ -153,10 +230,14 @@ th {
 }
 
 thead th {
-    background-color: #3f51b5; /* Header background color */
-    color: white; /* Header text color */
-    padding: 10px; /* Padding for table headers */
-    border-bottom: 2px solid #ddd; /* Bottom border for headers */
+    background-color: #3f51b5;
+    /* Header background color */
+    color: white;
+    /* Header text color */
+    padding: 10px;
+    /* Padding for table headers */
+    border-bottom: 2px solid #ddd;
+    /* Bottom border for headers */
 }
 
 tbody td {
@@ -171,7 +252,8 @@ tbody td {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url('path_to_backdrop_image.jpg'); /* Replace with actual image */
+    background-image: url('path_to_backdrop_image.jpg');
+    /* Replace with actual image */
     background-size: cover;
     background-position: center;
     z-index: -1;
@@ -179,33 +261,70 @@ tbody td {
 
 /* Feedback Text */
 p {
-    text-align: center; /* Center feedback text */
-    font-weight: bold; /* Bold feedback text */
-    color: #333; /* Dark text color */
+    text-align: center;
+    /* Center feedback text */
+    font-weight: bold;
+    /* Bold feedback text */
+    color: #333;
+    /* Dark text color */
 }
 
 /* Responsive Design */
 @media (max-width: 600px) {
     h1 {
-        font-size: 2em; /* Smaller heading on mobile */
+        font-size: 2em;
     }
 
     h2 {
-        font-size: 1.5em; /* Smaller subheading on mobile */
+        font-size: 1.5em;
     }
 
     form {
-        width: 90%; /* Wider form on small screens */
+        width: 90%;
     }
 
     .button {
-        font-size: 0.9em; /* Smaller buttons on mobile */
+        width: 100%;
+        /* Make buttons full width on small screens */
+        font-size: 0.9em;
     }
 
     .container {
         max-width: 100%;
         padding: 10px;
     }
+}
+
+/* Footer */
+footer {
+    background-color: #007bff;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}
+
+/* Feedback Text */
+p {
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Table Styles */
+.table-responsive {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 8px 12px;
 }
 
 .navbar {
@@ -318,7 +437,8 @@ p {
 }
 
 .close:hover {
-    color: #ff0000; /* Change color on hover */
+    color: #ff0000;
+    /* Change color on hover */
 }
 
 .player-headshot img {
@@ -342,16 +462,20 @@ p {
 
 .player-info-container {
     display: flex;
-    align-items: center; /* Aligns items vertically in the center */
+    align-items: center;
+    /* Aligns items vertically in the center */
 }
 
 .player-info-container select {
-    flex: 1; /* Allows the select to take available space */
+    flex: 1;
+    /* Allows the select to take available space */
 }
 
 .info-icon {
-    display: inline-flex; /* Make sure the icon is inline */
-    align-items: center; /* Centers the icon vertically */
+    display: inline-flex;
+    /* Make sure the icon is inline */
+    align-items: center;
+    /* Centers the icon vertically */
 }
 
 div.first-section {
@@ -359,8 +483,32 @@ div.first-section {
     text-align: left;
 }
 
-#dashboardPlayerName {
-    text-align: center;
+thead th {
+    background-color: #3f51b5;
+    color: white;
+    border-bottom: 2px solid #ddd;
+}
+
+
+/* General Form Styles */
+form {
+    max-width: 400px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    /* Ensure form width adapts to its parent */
+}
+
+label {
+    #dashboardPlayerName {
+        text-align: center;
+    }
 }
 
 /* Loader CSS */
@@ -373,8 +521,10 @@ div.first-section {
     width: 120px;
     height: 120px;
     animation: spin 2s linear infinite;
-    margin: 20px auto; /* Center the loader */
-    display: none; /* Hidden by default */
+    margin: 20px auto;
+    /* Center the loader */
+    display: none;
+    /* Hidden by default */
 }
 
 @keyframes spin {
@@ -396,6 +546,189 @@ div.first-section {
     display: block;
     margin-bottom: 5px;
     font-weight: bold;
+}
+
+input[type="email"],
+input[type="password"],
+input[type="text"],
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+    /* Prevent input overflow */
+}
+
+button {
+    width: 100%;
+    /* Ensure button fits within the form */
+    padding: 10px;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    form {
+        width: 90%;
+        /* Reduce width slightly for small screens */
+        padding: 15px;
+    }
+
+    input[type="email"],
+    input[type="password"],
+    button {
+        font-size: 1em;
+        /* Ensure readability on smaller devices */
+    }
+}
+
+
+/* Center the form elements */
+.container {
+    max-width: 100%;
+    max-height: 100%;
+    margin: 50px auto;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #f9f9f9;
+}
+
+
+/* Password Container Styling */
+.password-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.password-container input[type="password"],
+.password-container input[type="text"] {
+    width: 100%;
+    /* Space for the "Show" button on the right */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+/* Show/Hide Button Styling */
+.password-container button {
+    position: absolute;
+    right: 0px;
+    top: 20%;
+    transform: translateY(-50%);
+    /* Centers the button vertically */
+    /* background: black; */
+    background-color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: #007bff;
+    width: auto;
+    padding: 0;
+    /* Adjust padding to fit the text */
+}
+
+.password-container button:hover {
+    color: #0056b3;
+    transition: color 0.25s;
+}
+
+
+/* Centering the submit button and aligning other elements */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Center the login button without full width */
+button[type="submit"] {
+    padding: 10px 20px;
+    margin: 20px auto 0;
+    /* Centers the button horizontally */
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+    border-color: #007bff;
+    cursor: pointer;
+    font-size: 16px;
+    text-align: center;
+    transition: background-color 0.3s;
+    display: block;
+    /* Ensures the margin auto works for centering */
+}
+
+button[type="submit"]:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+    transition: color 0.25s;
+}
+
+
+/* Style the confirm logoutform */
+.confirm-logout-form {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.confirm-logout-form button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    width: 80px;
+
+}
+
+.confirm-logout-form button:hover {
+    transition: background-color 0.3s;
+    background-color: #0056b3;
+    color: white;
+}
+
+.confirm-logout-form .btn-yes {
+    background-color: white;
+    color: #007bff;
+    border: 1px solid #007bff;
+}
+
+.confirm-logout-form .btn-no {
+    background-color: #007bff;
+    color: white;
+    border: 1px solid #007bff;
+}
+
+.confirm-logout-form .btn-no a {
+    text-decoration: none;
+    color: white;
+}
+
+/* notification for error on verification */
+.flash.error {
+    background-color: #ffa7ae;
+    color: #a02a36;
+}
+
+.flash.success {
+    background-color: #96faad;
+    color: #1c7530;
 }
 
 #tradeForm select {

@@ -1,20 +1,30 @@
 # ignore .env
 .env
+
 .dockerignore
 Dockerfile
 # venv folder and all content
 venv/
 
-../.DS_Store
+#ignore pycache
+__pycache__/
+*.pyc
+
+
 cert.pem
 key.pem
 
 #ignore data folder and all contents
 data/
 
-../.DS_Store
-/__pycache__/
+.vscode/
+
+flask_session/
+
+# ignore any pycache or .pyc files
 __pycache__/
 *.pyc
+
+
+#ignore any .DS_Store files
 .DS_Store
-flask_session/
