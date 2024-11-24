@@ -11,6 +11,7 @@
 
 <body>
     <header>
+        {% if session.get('user_id') %}
         <div class="navbar">
             <div class="nav-home">
                 <a href="{{ url_for('main.home') }}">Home</a>
@@ -21,73 +22,19 @@
                 <a href="{{ url_for('main.trade_builder') }}">Trade Builder</a>
             </div>
             <div class="nav-logout-login-register">
-                {% if session.get('user_id') %}
                 <a href="{{ url_for('main.logout') }}">Logout</a>
-                {% else %}
+            </div>
+        </div>
+        <!-- <div class="navbar">
+            <div class="nav-logout-login-register">
                 <a href="{{ url_for('main.login') }}">Login</a>
                 <a href="{{ url_for('main.register') }}">Create Account</a>
-                {% endif %}
-                <!-- <img src="{{ url_for('static', filename='user-icon.png') }}" alt="User Icon"> -->
-
             </div>
-        </div>
+        </div> -->
+        {% endif %}
     </header>
     <main>
-
         {% block content %}{% endblock %}
-
-         <!-- Player Info Dashboard Modal -->
-         <div id="playerDashboard" class="modal" style="display: none;">
-            <div class="modal-content" style="text-align: center;">
-                <span id="closeDashboard" class="close">&times;</span>
-                
-                <!-- Player Headshot -->
-                <div class="player-headshot">
-                    <img id="playerHeadshot" src="path_to_headshot.jpg" alt="Player Headshot" />
-                </div>
-        
-                <!-- Player Name and Position -->
-                <h3 id="dashboardPlayerName"></h3>
-                <div class="first-section">
-                    <p><strong>Position:</strong> <span id="dashboardPlayerPosition">Loading...</span></p>
-                    <p><strong>Team:</strong> <span id="playerTeam">Loading...</span></p>
-                    <p><strong>Bye Week:</strong> <span id="byeWeek">Loading...</span></p>
-                </div>
-        
-                <!-- Analysis Sections -->
-                <div class="dashboard-analysis">
-
-                    <div class="dashboard-section">
-                        <h4>Injury Status</h4>
-                        <p id="injury">Loading...</p>
-                    </div>
-
-                    <!-- Projected Points -->
-                    <!-- <div class="dashboard-section">
-                        <h4>Projected Points</h4>
-                        <p id="projectedPoints">Loading...</p>
-                    </div> -->
-                    
-                    
-                    <!-- Ranking -->
-                    <div class="dashboard-section">
-                        <h4>Last Week's Performance</h4>
-                        <p><strong>Last Week:</strong> <span id="playerRanking">Loading...</span></p>
-                    </div>
-                    
-                    <!-- Upcoming Matchup -->
-                    <!-- <div class="dashboard-section">
-                        <h4>Upcoming Matchup</h4>
-                        <p><strong>Opponent:</strong> <span id="opponentTeam">Loading...</span></p>
-                    </div> -->
-                </div>
-            </div>
-        </div>
-        
     </main>
-    <footer>
-        <p>&copy; 2024 Yahoo Fantasy Football MVP</p>
-    </footer>
 </body>
-
 </html>

@@ -98,17 +98,21 @@ def register():
     return render_template("register.html")
 
 
+from flask import flash
+
 @main.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         email = request.form.get("email")
         password = request.form.get("password")
         if not email or not password:
-            return jsonify({"error": "Missing email or password"}), 400
+            flash("Missing email or password", "error")
+            return redirect(url_for("main.login"))
 
         user = get_user_by_email(email)
         if not user or not verify_password(user["password"], password):
-            return jsonify({"error": "Invalid email or password"}), 400
+            flash("Invalid email or password", "error")
+            return redirect(url_for("main.login"))
 
         session["user_id"] = user["id"]
         return redirect(url_for("main.home"))
@@ -128,7 +132,7 @@ def logout():
 
         # Redirect to Yahoo's logout page
         return render_template("logout.html")
-    # return redirect(f"https://login.yahoo.com/config/login?logout=1&.direct=1&.done={url_for('index', _external=True)}")
+        # return redirect(f"https://login.yahoo.com/config/login?logout=1&.direct=1&.done={url_for('index', _external=True)}")
     return render_template("confirm_logout.html")
 
 

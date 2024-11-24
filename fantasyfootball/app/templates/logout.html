@@ -4,16 +4,19 @@
 {% block content %}
 <p>Logging out...</p>
 <script>
-
     // Redirect to Yahoo's logout page with a return URL
-    const yahooLogoutUrl = "https://login.yahoo.com/config/login?logout=1&.direct=1&.done={{ url_for('index', _external=True) }}";
+    const yahooLogoutUrl = "https://login.yahoo.com/config/login?logout=1&.direct=1&.done={{ url_for('main.home', _external=True) }}";
     
     // Redirect to Yahoo logout
     window.location.href = yahooLogoutUrl;
 
-    // After a delay, redirect back to the index page
-    setTimeout(function() {
-        window.location.href = "{{ url_for('index') }}";
-    }, 5000); // Adjust the delay as needed (1000 milliseconds = 1 second)
+    // Check the URL every second to see if it has changed to Yahoo's site
+    const checkUrlInterval = setInterval(function() {
+        if (window.location.hostname === 'login.yahoo.com') {
+            // Redirect back to the home page
+            window.location.href = "{{ url_for('main.home') }}";
+            clearInterval(checkUrlInterval);
+        }
+    }, 1000); // Check every second (1000 milliseconds)
 </script>
 {% endblock %}

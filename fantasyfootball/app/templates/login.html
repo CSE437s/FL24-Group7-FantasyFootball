@@ -15,6 +15,15 @@
 
         <button type="submit">Login</button>
     </form>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="flash {{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
 </div>
 <script>
     const togglePassword = document.querySelector('#togglePassword');
@@ -26,6 +35,13 @@
         password.setAttribute('type', type);
         // Toggle the button text
         this.textContent = type === 'password' ? 'Show' : 'Hide';
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const flashes = document.querySelectorAll('.flash');
+        flashes.forEach(function(flash) {
+            alert(flash.textContent);
+        });
     });
 </script>
 {% endblock %}
