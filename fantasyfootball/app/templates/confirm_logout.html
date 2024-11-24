@@ -1,0 +1,13 @@
+<!-- app/templates/confirm_logout.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h1>Confirm Logout</h1>
+    <p>Are you sure you want to log out?</p>
+    <form method="POST" action="{{ url_for('main.logout') }}" class="confirm-logout-form">
+        <button type="submit" class="btn-yes">Yes</button>
+        <button type="button" class="btn-no"><a href="{{ url_for('main.home') }}">No</a></button>
+        </form>
+</div>
+
+{% endblock %}
