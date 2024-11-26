@@ -11,8 +11,7 @@
     </p>
 
     <section class="waiver-wire">
-        <!-- <h2>All League Players</h2> -->
-         <h4>Filter by Position</h4>
+        <h4>Filter by Position</h4>
 
         <div class="position-filter mb-3">
             {% for pos in ["", "QB", "RB", "WR", "TE", "DEF", "K"] %}
@@ -25,6 +24,7 @@
 
         <!-- Waiver Wire Table -->
         <div class="table-responsive">
+            {% if waiver_wire_players %}
             <table id="waiverTable" class="table table-striped table-bordered table-hover">
                 <thead class="thead-light">
                     <tr>
@@ -54,15 +54,20 @@
                         </td>
                         <td>{{ player.team_abb }}</td>
                         <td>{{ player.Pos }}</td>
-                        <td data-order="{{ player.previous_performance }}">{{ player.previous_performance }} pts</td>
+                        <td>{{ player.previous_performance }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
+            {% else %}
+            <p>No data available. Please connect to a league to view players.</p>
+            {% endif %}
         </div>
     </section>
 
 </div>
+
+{% include "_player_info.html" %}
 
 <!-- jQuery and Font Awesome -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -86,22 +91,22 @@
             window.location.href = "{{ url_for('main.waiver_wire') }}" + "?positionFilter=" + selectedPosition;
         });
 
-        // Use event delegation to handle info icon click
-        $('#waiverTable').on('click', '.info-icon', function(event) {
+        // Handle info icon click
+        $('.info-icon').on('click', function(event) {
             event.preventDefault();  // Prevent default link behavior
 
             // Retrieve data attributes
-            const playerName = $(this).data('player-name') || 'Error Loading Player Name';
+            const playerName = $(this).data('player-name') || 'Unknown Player';
             const playerPos = $(this).data('player-pos') || 'Position Unknown';
-            const playerHeadshot = $(this).data('player-headshot') || 'image not found';
+            const playerHeadshot = $(this).data('player-headshot') || 'https://s.yimg.com/xe/i/us/sp/v/nfl_cutout/players_l/07152024/40881.png';
             const projPoints = $(this).data('player-ranking') || 'N/A';
-            const playerTeam = $(this).data('player-team') || 'team not found';
+            const playerTeam = $(this).data('player-team') || 'Team Unknown';
             const playerBye = $(this).data('player-bye') || 'N/A';
             const playerStatus = $(this).data('player-status') || 'N/A';
             const playerInjury = $(this).data('player-injury') || 'N/A';
 
             // Populate the dashboard with player data
-            document.getElementById("dashboardPlayerName").innerText = playerName;
+            document.getElementById("dashboardPlayerName").innerText =  playerName;
             document.getElementById("dashboardPlayerPosition").innerText = playerPos;
             document.getElementById("playerHeadshot").src = playerHeadshot;
             document.getElementById("playerTeam").innerText = playerTeam;

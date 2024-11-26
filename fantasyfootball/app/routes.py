@@ -838,14 +838,14 @@ def trade_builder():
 
             # Fetch team 1 roster
             cursor.execute(
-                'SELECT "player_name", "primary_position", "image", "previous_performance", "team_name", "bye", "status", "injury", "player_key", "previous_week", "ppg", "total_points", "team_abb" FROM "player_data" WHERE "team_name" = %s',
+                'SELECT "player_name", "primary_position", "image", "previous_performance", "bye", "status", "injury", "previous_week", "total_points", "team_abb", "season_totals" FROM "player_data" WHERE "team_name" = %s',
                 (team1,),
             )
             team1_roster = cursor.fetchall()
 
             # Fetch team 2 roster
             cursor.execute(
-                'SELECT "player_name", "primary_position", "image", "previous_performance", "team_name", "bye", "status", "injury", "player_key", "previous_week", "ppg", "total_points","team_abb" FROM "player_data" WHERE "team_name" = %s',
+                'SELECT "player_name", "primary_position", "image", "previous_performance", "bye", "status", "injury", "previous_week", "total_points", "team_abb", "season_totals" FROM "player_data" WHERE "team_name" = %s',
                 (team2,),
             )
             team2_roster = cursor.fetchall()
@@ -859,15 +859,13 @@ def trade_builder():
                     "Pos": player[1],
                     "img": player[2],
                     "previous_performance": player[3],
-                    "team_name": player[4],
-                    "bye": player[5],
-                    "status": player[6],
-                    "injury": player[7],
-                    "player_key": player[8],
-                    "previous_week": player[9],
-                    "ppg": player[10],
-                    "total_points": player[11],
-                    "team_abb": player[12],
+                    "bye": player[4],
+                    "status": player[5],
+                    "injury": player[6],
+                    "previous_week": player[7],
+                    "total_points": player[8],
+                    "team_abb": player[9],
+                    "season_totals": player[10],
                 }
                 team1_roster_info.append(team1_info)
 
@@ -878,15 +876,13 @@ def trade_builder():
                     "Pos": player[1],
                     "img": player[2],
                     "previous_performance": player[3],
-                    "team_name": player[4],
-                    "bye": player[5],
-                    "status": player[6],
-                    "injury": player[7],
-                    "player_key": player[8],
-                    "previous_week": player[9],
-                    "ppg": player[10],
-                    "total_points": player[11],
-                    "team_abb": player[12],
+                    "bye": player[4],
+                    "status": player[5],
+                    "injury": player[6],
+                    "previous_week": player[7],
+                    "total_points": player[8],
+                    "team_abb": player[9],
+                    "season_totals": player[10],
                 }
                 team2_roster_info.append(team2_info)
 

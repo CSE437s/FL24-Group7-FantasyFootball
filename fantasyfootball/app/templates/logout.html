@@ -12,9 +12,11 @@
 
     // Check the URL every second to see if it has changed to Yahoo's site
     const checkUrlInterval = setInterval(function() {
-        if (window.location.hostname === 'login.yahoo.com') {
-            // Redirect back to the home page
-            window.location.href = "{{ url_for('main.home') }}";
+        if (window.location.hostname === 'yahoo.com') {
+            // Redirect back to the home page after a delay
+            setTimeout(function() {
+                window.location.href = "{{ url_for('main.home') }}";
+            }, 5000); // Adjust the delay as needed (5000 milliseconds = 5 seconds)
             clearInterval(checkUrlInterval);
         }
     }, 1000); // Check every second (1000 milliseconds)
