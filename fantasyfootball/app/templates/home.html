@@ -26,6 +26,21 @@
     {% if player_and_teams_loaded %}
     <h2>Connected!</h2>
     {% endif %}
+
+    <!-- More Content -->
+     <!-- Teams -->
+      <h2>All NFL Teams</h2>
+     <div class="grid-container">
+        <!-- Flask dynamically renders these cells -->
+        {% for team in teams_data %}
+        <a href="{{ team.espn_link }}" target="_blank" class="team-cell">
+          <img src="{{ team.logo_url }}" alt="{{ team.name }}" class="team-image">
+          <div class="team-name">{{ team.name }}</div>
+        </a>
+        {% endfor %}
+      </div>
+    <!-- Football API -->
+
 </div>
 
 <!-- Add the JavaScript to show the loader when the form is submitted -->

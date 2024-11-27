@@ -1,18 +1,41 @@
+/*
+General Colors to use:
+Primary Color (Purple): #5A1EAB
+Represents Yahoo’s signature color, bringing a sense of familiarity.
+
+Accent Colors:
+Vibrant Green (#00D084): Emulates the color of the field and can be used for highlights, successful actions, or scoring elements.
+Bright Yellow (#FFC107): A great highlight color for important stats, alerts, or call-to-action buttons.
+Cool Blue (#2C82C9): For secondary actions, links, or less prominent statistics, to balance the vibrancy of the primary and accent colors.
+
+Background Colors:
+Light Gray (#F3F4F6): For the main background, to keep things readable and less tiring on the eyes.
+Darker Gray (#424242): For card backgrounds or contrast sections to make key stats pop.
+
+Font Colors:
+Dark Slate (#333333): For headings, making information clear and readable.
+Muted Black (#212121): For general text to keep it professional and legible without harsh contrasts.
+*/
+
+
 /* General Styles */
 body {
+    height: 100vh;
+    width: 100vw;
+    line-height: 1.6;
     font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    background-color: #5A1EAB;
     color: #333;
     margin: 0;
     padding: 0;
 }
 
+
+
 .container {
     max-width: 1200px;
-    margin: 50px auto;
     padding: 20px;
     background: white;
-    border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     text-align: center;
 }
@@ -38,7 +61,7 @@ h1 {
 
 h2 {
     font-size: 1.8em;
-    color: #3f51b5;
+    color: #5A1EAB;
 }
 
 h3 {
@@ -48,10 +71,10 @@ h3 {
 
 /* Header */
 header {
-    background-color: #007bff;
+    background-color: #5A1EAB;
 }
 
-footer {
+/* footer {
     background-color: #333;
     color: white;
     text-align: center;
@@ -61,8 +84,7 @@ footer {
     bottom: 0;
     display: none;
     font-size: 0.9em;
-    /* Smaller font size for footer */
-}
+} */
 
 /* List Styles */
 .leagues,
@@ -108,21 +130,65 @@ footer {
     justify-content: space-between;
     align-items: center;
     padding: 10px 20px;
-    background-color: #007bff;
+    background-color: #5A1EAB;
+    width: auto;
 }
+
+
 
 /* Left, Center, and Right Alignment */
 .nav-home {
     flex: 1;
-    text-align: left;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-home a {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+}
+
+
+.navbar-logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #5A1EAB;
+    width: auto;
+    text-decoration: none;
+}
+.navbar-logo a {
+    font-family: "Montserrat", sans-serif;
+    font-size: large;
+    font-weight: 600;
+    font-style: normal;
+    color: white;
+    padding: 0;
+    margin: 0;
+}
+#logoName{
+    font-family: "Montserrat", sans-serif;
+    font-size: large;
+    font-weight: 600;
+    font-style: normal;
+    color: white;
+    padding: 0;
+    margin: 0;
 }
 
 .nav-features {
     display: flex;
-    gap: 20px;
+    gap: 50px;
     /* Spacing between feature links */
     justify-content: center;
-    flex: 2;
+    flex: 3;
 }
 
 .nav-logout-login-register {
@@ -134,13 +200,14 @@ footer {
 .navbar a {
     color: white;
     text-decoration: none;
-    padding: 10px;
 }
 
 .navbar a:hover {
-    background-color: #0056b3;
-    border-radius: 4px;
-    transition: color 0.25s;
+    transition: color 0.25s, border-bottom 0.25s;
+    border-bottom: 2px solid white;
+    color: white;
+    text-decoration: none;
+
 }
 
 /* Buttons */
@@ -157,13 +224,15 @@ button {
     cursor: pointer;
     text-align: center;
     text-decoration: none;
-    background-color: #007bff;
+    background-color: #5A1EAB;
     transition: background-color 0.3s;
 }
 
 .button:hover,
 button:hover {
-    background-color: #0056b3;
+    border: 1px solid #5A1EAB;
+    background-color: white;
+    color: #5A1EAB
 }
 
 .button.secondary {
@@ -230,7 +299,7 @@ th {
 }
 
 thead th {
-    background-color: #3f51b5;
+    background-color: #573fb5;
     /* Header background color */
     color: white;
     /* Header text color */
@@ -296,15 +365,32 @@ p {
 }
 
 /* Footer */
-footer {
-    background-color: #007bff;
-    color: white;
+.footer {
     text-align: center;
-    padding: 10px 0;
-    position: fixed;
-    width: 100%;
-    bottom: 0;
-}
+    padding: 20px 0;
+    background-color: #5A1EAB;
+    color: #fff;
+    font-size: 0.9rem;
+  }
+
+  .footer-links {
+    margin-bottom: 10px;
+  }
+
+  .footer-links a {
+    color: #fff;
+    text-decoration: none;
+    margin: 0 5px;
+  }
+
+  .footer-links a:hover {
+    text-decoration: underline;
+  }
+
+  .footer p {
+    margin: 0;
+    color: rgb(163, 163, 163);
+  }
 
 /* Feedback Text */
 p {
@@ -333,16 +419,6 @@ td {
     align-items: center;
     max-width: 800px;
     margin: 0 auto;
-}
-
-.navbar a {
-    color: white;
-    text-decoration: none;
-    padding: 10px;
-}
-
-.navbar a:hover {
-    background-color: #555;
 }
 
 .user-icon img {
@@ -484,7 +560,7 @@ div.first-section {
 }
 
 thead th {
-    background-color: #3f51b5;
+    background-color: #4a1989;
     color: white;
     border-bottom: 2px solid #ddd;
 }
@@ -566,7 +642,7 @@ button {
     /* Ensure button fits within the form */
     padding: 10px;
     color: white;
-    background-color: #007bff;
+    background-color: #5A1EAB;
     border: none;
     border-radius: 3px;
     cursor: pointer;
@@ -574,7 +650,9 @@ button {
 }
 
 button:hover {
-    background-color: #0056b3;
+    color: #5A1EAB;
+    background-color: white;
+    border: 1px solid #5A1EAB;
 }
 
 /* Responsive Design */
@@ -598,11 +676,10 @@ button:hover {
 .container {
     max-width: 100%;
     max-height: 100%;
-    margin: 50px auto;
+    margin: 0 auto;
     padding: 20px;
     text-align: center;
     border: 1px solid #ccc;
-    border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     background-color: #f9f9f9;
 }
@@ -637,14 +714,16 @@ button:hover {
     border: none;
     cursor: pointer;
     font-size: 14px;
-    color: #007bff;
+    color: #5A1EAB;
     width: auto;
     padding: 0;
     /* Adjust padding to fit the text */
 }
 
 .password-container button:hover {
-    color: #0056b3;
+    color: #5A1EAB;
+    background-color: white;
+    border: 1px solid #5A1EAB;
     transition: color 0.25s;
 }
 
@@ -661,10 +740,9 @@ button[type="submit"] {
     padding: 10px 20px;
     margin: 20px auto 0;
     /* Centers the button horizontally */
-    background-color: #007bff;
+    background-color: #5A1EAB;
     color: white;
     border-radius: 4px;
-    border-color: #007bff;
     cursor: pointer;
     font-size: 16px;
     text-align: center;
@@ -674,8 +752,9 @@ button[type="submit"] {
 }
 
 button[type="submit"]:hover {
-    background-color: #0056b3;
-    border-color: #0056b3;
+    border: 1px solid #5A1EAB;
+    background-color: white;
+    color: #5A1EAB;
     transition: color 0.25s;
 }
 
@@ -683,36 +762,41 @@ button[type="submit"]:hover {
 /* Style the confirm logoutform */
 .confirm-logout-form {
     display: flex;
-    justify-content: center;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
     gap: 10px;
 }
 
 .confirm-logout-form button {
+    border: 1px solid blue;
     padding: 8px 16px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     font-size: 14px;
     width: 80px;
+    margin: 0;
 
 }
 
 .confirm-logout-form button:hover {
     transition: background-color 0.3s;
-    background-color: #0056b3;
-    color: white;
+    color: #5A1EAB;
+    background-color: white;
+    border: 1px solid #5A1EAB;
 }
 
 .confirm-logout-form .btn-yes {
-    background-color: white;
-    color: #007bff;
-    border: 1px solid #007bff;
+    background-color: #5A1EAB;
+    color: white;
+    border: 1px solid #5A1EAB;
 }
 
 .confirm-logout-form .btn-no {
-    background-color: #007bff;
+    background-color: #5A1EAB;
     color: white;
-    border: 1px solid #007bff;
+    border: 1px solid #5A1EAB;
 }
 
 .confirm-logout-form .btn-no a {
@@ -740,7 +824,7 @@ button[type="submit"]:hover {
 }
 
 #tradeForm button {
-    background-color: #3498db;
+    background-color: #5A1EAB;
     color: white;
     padding: 10px 20px;
     border: none;
@@ -749,7 +833,9 @@ button[type="submit"]:hover {
 }
 
 #tradeForm button:hover {
-    background-color: #2980b9;
+    color: #5A1EAB;
+    background-color: white;
+    border: 1px solid #5A1EAB;
 }
 
 /* Button Styling */
@@ -785,4 +871,232 @@ button#restartTradeButton {
 button#copyTradeButton:hover,
 button#restartTradeButton:hover {
     background-color: #27ae60;
+}
+
+
+
+/* Index.html */
+.container-home {
+    height: 100vh;
+    width: 100vw;
+    text-align: center;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+#content-block-left {
+    position: relative;
+    max-width: 50%;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+}
+.content-block-left img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    display: block;
+
+}
+
+#content-block-right {
+    max-width: 50%;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: #F3F4F6;
+}
+
+#home-header1 {
+    font-size: 2.5rem;
+    color: #4A00E0;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#home-p {
+    font-size: 1.2rem;
+    color: #333;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.buttons-container-home{
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 30px;
+}
+
+.button-home {
+    display: inline-block;
+    width: 200px;
+    padding: 10px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    color: white;
+    background-color: #5A1EAB;
+    border:2px solid #5A1EAB;
+    transition: all 0.3s ease-in-out;
+}
+
+.button-home:hover {
+    border: 1px solid #5A1EAB;
+    background-color: white;
+    color: #5A1EAB;
+
+}
+
+/* about-us.html */
+.about-us-content {
+    margin: 0 auto;
+    padding: 20px;
+    background: #fff;
+}
+.about-us-content h1, h2, h3 {
+    color: #5A1EAB;
+    text-align: center;
+}
+.about-us-content ul {
+    list-style: none;
+}
+.about-us-content p {
+    margin: 15px 0;
+    text-align: center;
+}
+.about-us-content .section {
+    margin-bottom: 30px;
+}
+
+
+/* terms-of-service.html */
+
+.terms_of_service {
+    margin: 0 auto;
+    padding: 20px;
+    background: #fff;
+  }
+
+  .general-terms section {
+    margin-bottom: 20px;
+  }
+ .general-terms h2 {
+    color: #5A1EAB;
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+  }
+
+  .general-terms p, ul {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    list-style: none;
+  }
+
+  .general-terms ul {
+    padding-left: 20px;
+    list-style: none;
+  }
+
+ .general-terms ul li {
+    margin-bottom: 8px;
+  }
+
+  .general-terms a {
+    color: #5A1EAB;
+    text-decoration: none;
+  }
+
+  .general-terms a:hover {
+    text-decoration: underline;
+  }
+
+  /* Home.html */
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    padding: 16px;
+    min-height: 100vh;
+    box-sizing: border-box;
+  }
+
+  .team-cell {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
+    text-align: center;
+  }
+
+  .team-cell:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transform: scale(1.03);
+  }
+
+  .team-image {
+    width: 100%;
+    height: 66%;
+    object-fit: cover;
+    border-bottom: 1px solid black;
+    display: block;
+    padding: 5px;
+  }
+
+  .team-name {
+    height: 34%; /* Complements .team-image height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2em;
+    color: #333;
+    background-color: #fff;
+  }
+
+  .grid-container a {
+    text-decoration: none;
+  }
+
+  /* waiver_wire.html */
+
+  .position-filter{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 100%;
+  }
+  .table-responsive .dataTables_wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Add spacing between sections */
+}
+
+.table-responsive .dataTables_wrapper .top-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px; /* Add some space between controls and the table */
+}
+#waiverTable tbody tr:nth-child(odd) {
+    background-color: #f9f9f9; /* Light gray or your desired shade */
+}
+
+#waiverTable tbody tr:nth-child(even) {
+    background-color: #ffffff; /* White or another shade */
 }

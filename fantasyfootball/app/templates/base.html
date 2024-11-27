@@ -7,6 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Yahoo Fantasy Football MVP{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
 </head>
 
 <body>
@@ -14,7 +16,8 @@
         {% if session.get('user_id') %}
         <div class="navbar">
             <div class="nav-home">
-                <a href="{{ url_for('main.home') }}">Home</a>
+                <a href="{{ url_for('main.home') }}">
+                    <p id="logoName">YFFMVP</p> | Home</a>
             </div>
             <div class="nav-features">
                 <a href="{{ url_for('main.waiver_wire') }}">League Players</a>
@@ -25,16 +28,25 @@
                 <a href="{{ url_for('main.logout') }}">Logout</a>
             </div>
         </div>
-        <!-- <div class="navbar">
-            <div class="nav-logout-login-register">
-                <a href="{{ url_for('main.login') }}">Login</a>
-                <a href="{{ url_for('main.register') }}">Create Account</a>
-            </div>
-        </div> -->
+        {% else %}
+            <a  class="navbar-logo" href="{{ url_for('main.index') }}">
+                <p id="logoName">YFFMVP</p></a>
         {% endif %}
     </header>
     <main>
         {% block content %}{% endblock %}
     </main>
+    <footer class="footer">
+        <div class="footer-links">
+            {% if session.get('user_id') %}
+            <a href="{{ url_for('main.home') }}">Home</a> |
+            {% else %}
+            <a href="{{ url_for('main.index') }}">Home</a> |
+            {% endif %}
+            <a href="{{ url_for('main.about_us') }}">About Us</a> |
+            <a href="{{ url_for('main.terms_of_service') }}">Terms of Service</a>
+        </div>
+        <p>&copy; 2024 Yahoo Fantasy Football MVP. All rights reserved.</p>
+    </footer>
 </body>
 </html>

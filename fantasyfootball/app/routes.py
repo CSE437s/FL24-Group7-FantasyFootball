@@ -9,6 +9,8 @@ from flask import (
     flash,
 )
 import os
+import requests
+import json
 from yfpy.query import YahooFantasySportsQuery
 from pathlib import Path
 from flask import render_template
@@ -44,6 +46,9 @@ load_dotenv(override=True)
 api = Blueprint("api", __name__)
 main = Blueprint("main", __name__)
 
+# Endpoint for fethcing from `Football News API`
+FOOTBALL_NEWS_API_URL= "https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams"
+
 
 def extract_serializable_data(obj):
     # If the object has '_extracted_data', use it
@@ -66,6 +71,23 @@ def extract_serializable_data(obj):
     else:
         return str(obj)  # Convert to string as a last resort
 
+@main.route("/")
+def index():
+    return render_template(
+        "index.html"
+    )
+
+@main.route("/terms_of_service")
+def terms_of_service():
+    return render_template(
+    "terms_of_service.html"
+    )
+
+@main.route("/about_us")
+def about_us():
+    return render_template(
+    "about_us.html"
+    )
 
 @main.route("/register", methods=["GET", "POST"])
 def register():
@@ -230,6 +252,32 @@ def home():
         if isinstance(league.name, bytes):
             league.name = league.name.decode("utf-8")
 
+    # Get connection from the pool
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute(
+                'SELECT "id", "name", "logo_url", "espn_link" '
+                'FROM "nfl_teams"'
+    )
+
+    rows = cursor.fetchall()
+
+    # Convert rows to dictionary format
+    teams_data = [
+        {
+            "id": row[0],
+            "name": row[1],
+            "logo_url": row[2],
+            "espn_link": row[3],
+        }
+    for row in rows
+    ]
+
+        # Close cursor and release connection
+    cursor.close()
+    release_connection(connection)
+
+
     if request.method == "POST":
         selected_league_id = request.form.get("league_id")
         session["selected_league_id"] = selected_league_id
@@ -291,6 +339,7 @@ def home():
     return render_template(
         "home.html",
         leagues=leagues,
+        teams_data=teams_data,
     )
 
 

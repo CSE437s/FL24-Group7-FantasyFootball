@@ -3,12 +3,19 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container">
-    <h1>Welcome to Yahoo Fantasy Football MVP!</h1>
-    <p>Your ultimate tool for managing your fantasy football team.</p>
-    <div class="buttons">
-        <a href="{{ url_for('main.login') }}" class="button">Login</a>
-        <a href="{{ url_for('main.register') }}" class="button">Create New Account</a>
+<div class="container container-home">
+    <div id="content-block-left">
+        <img src="../static/homeImage.png" alt="Football Image with Yahoo Logo" id="homepageImage">
     </div>
+    <div id="content-block-right">
+        <h1 id="home-header1">Welcome to Yahoo Fantasy Football MVP!</h1>
+        <p id="home-p">Your ultimate tool for managing your fantasy football team.</p>
+        <p>Log in or sign up to get started</p>
+        <div class="buttons buttons-container-home">
+            <a href="{{ url_for('main.login') }}" class="button-home">Login</a>
+            <a href="{{ url_for('main.register') }}" class="button-home">Create New Account</a>
+        </div>
+    </div>
+
 </div>
 {% endblock %}
