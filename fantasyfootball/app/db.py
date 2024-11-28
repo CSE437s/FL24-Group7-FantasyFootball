@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 from time import sleep
-from nfl_team_data import nfl_team
+from .nfl_team_data import nfl_team
 
 load_dotenv(override=True)
 
