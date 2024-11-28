@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 from time import sleep
+from nfl_team_data import nfl_team
 
 load_dotenv(override=True)
 
@@ -519,6 +520,60 @@ def upsert_player_data(player_team_data):
 
     except Exception as error:
         print("Error during upsert operation:", error)
+    
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+def create_nfl_teams_table():
+    """Create nfl_teams table if it does not exist."""
+    connection = None
+    cursor = None
+    try:
+        connection = get_connection()
+        cursor = connection.cursor()
+
+        create_table_query = '''
+        CREATE TABLE IF NOT EXISTS "nfl_teams" (
+        "id" SERIAL PRIMARY KEY,
+        "name" VARCHAR(100) NOT NULL,
+        "logo_url" TEXT NOT NULL,
+        "espn_link" TEXT NOT NULL
+        );
+        '''
+        
+        cursor.execute(create_table_query)
+        alter_table_queries = [
+            'ALTER TABLE "nfl_teams" ADD COLUMN IF NOT EXISTS "name" VARCHAR(100) NOT NULL;',
+            'ALTER TABLE "nfl_teams" ADD COLUMN IF NOT EXISTS "logo_url" TEXT NOT NULL;',
+            'ALTER TABLE "nfl_teams" ADD COLUMN IF NOT EXISTS "espn_link" TEXT NOT NULL;',
+        ]
+        for query in alter_table_queries:
+            cursor.execute(query)
+        connection.commit()
+        print("Table 'nfl_teams' created successfully or already exists.")
+        
+        # Check if the table is empty
+        check_table_query = 'SELECT COUNT(*) FROM nfl_teams;'
+        cursor.execute(check_table_query)
+        count = cursor.fetchone()[0]
+
+        if count == 0:
+            # Insert data if the table is empty
+            insert_data_query = '''
+            INSERT INTO nfl_teams (name, logo_url, espn_link)
+            VALUES (%s, %s, %s);
+            '''
+            for team in nfl_teams:
+                cursor.execute(insert_data_query, (team['name'], team['logo_url'], team['espn_link']))
+            connection.commit()
+            print("Table 'nfl_teams' populated with initial data.")
+        else:
+            print("Table 'nfl_teams' already contains data.")
+    except Exception as error:
+        print("Error creating table:", error)
     
     finally:
         if cursor:

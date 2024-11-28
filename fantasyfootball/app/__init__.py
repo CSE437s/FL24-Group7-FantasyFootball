@@ -9,6 +9,7 @@ from .db import (
     get_access_token_by_user_id,
     create_users_table,
     create_player_data_table,
+    create_nfl_teams_table,
 )
 from .routes import api, main
 from flask_session import Session  # Import Flask-Session extension
@@ -29,6 +30,7 @@ def create_app():
     create_access_tokens_table()
     create_users_table()
     create_player_data_table()
+    create_nfl_teams_table()
 
     # @app.route("/")
     # def index():
