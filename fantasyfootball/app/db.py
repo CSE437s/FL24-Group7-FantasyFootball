@@ -566,7 +566,7 @@ def create_nfl_teams_table():
             INSERT INTO nfl_teams (name, logo_url, espn_link)
             VALUES (%s, %s, %s);
             '''
-            for team in nfl_teams:
+            for team in nfl_team:
                 cursor.execute(insert_data_query, (team['name'], team['logo_url'], team['espn_link']))
             connection.commit()
             print("Table 'nfl_teams' populated with initial data.")
