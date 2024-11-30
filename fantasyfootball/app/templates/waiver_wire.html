@@ -13,13 +13,18 @@
     <section class="waiver-wire">
         <h4>Filter by Position</h4>
 
-        <div class="position-filter mb-3">
-            {% for pos in ["", "QB", "RB", "WR", "TE", "DEF", "K"] %}
-                <label class="mr-3">
-                    <input type="radio" name="positionFilter" value="{{ pos }}" {% if position_filter == pos %}checked{% endif %}>
-                    {{ pos if pos else "All" }}
-                </label>
-            {% endfor %}
+        <div class="filter-container">
+            <div class="position-filter">
+                {% for pos in ["", "QB", "RB", "WR", "TE", "DEF", "K"] %}
+                    <label class="mr-3">
+                        <input type="radio" name="positionFilter" value="{{ pos }}" {% if position_filter == pos %}checked{% endif %}>
+                        {{ pos if pos else "All" }}
+                    </label>
+                {% endfor %}
+            </div>
+            <div class="search-bar">
+                <!-- The DataTables search bar will be placed here -->
+            </div>
         </div>
 
         <!-- Waiver Wire Table -->
@@ -83,11 +88,13 @@
         // Initialize DataTables
         $('#waiverTable').DataTable({
             "order": [[3, "desc"]], // Sort by the 4th column (Previous Performance) in descending order
-            dom: '<"top-controls"lf>rt<"bottom-controls"ip>',
+            dom: '<"top-controls"f>rt<"bottom-controls"ip>',
             paging: true, // Enable pagination
+            pageLength: 20, // Set number of players per page
             searching: true, // Enable search
             ordering: true, // Enable sorting
             responsive: true, // Ensure responsiveness
+            info: false, // Disable the "Showing X of Y results" text
         });
 
         // Radio button change for position filtering
@@ -95,6 +102,8 @@
             const selectedPosition = $(this).val();
             window.location.href = "{{ url_for('main.waiver_wire') }}" + "?positionFilter=" + selectedPosition;
         });
+
+        $('.dataTables_filter').appendTo('.search-bar');
 
         // Handle info icon click
         $('.info-icon').on('click', function(event) {

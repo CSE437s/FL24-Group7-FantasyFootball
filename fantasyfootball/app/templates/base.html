@@ -1,4 +1,3 @@
-<!-- app/templates/base.html -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -8,7 +7,6 @@
     <title>{% block title %}Yahoo Fantasy Football MVP{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-
 </head>
 
 <body>
@@ -29,10 +27,18 @@
             </div>
         </div>
         {% else %}
-            <a  class="navbar-logo" href="{{ url_for('main.index') }}">
+            <a class="navbar-logo" href="{{ url_for('main.index') }}">
                 <p id="logoName">YFFMVP</p></a>
         {% endif %}
     </header>
+
+    <!-- League Info Box -->
+    {% if session.get('league_name') %}
+    <div class="league-info-box">
+        <p>Connected to League: {{ session.get('league_name') }}</p>
+    </div>
+    {% endif %}
+
     <main>
         {% block content %}{% endblock %}
     </main>

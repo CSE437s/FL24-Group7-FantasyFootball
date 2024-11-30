@@ -30,7 +30,12 @@
                 <h3>{{ request.form.team1 }}</h3>
                 <div class="team1-players-container">
                     <label for="team1_player">Player(s) to trade from {{ request.form.team1 }}:</label>
+                    <button type="button" id="add-team1">Add Player</button>
                     <div class="team1_player_container">
+                        <div class="select-icon-container">
+                            <a href="#" class="info-icon" style="margin-left: 5px;">
+                                <i class="fas fa-info-circle"></i>
+                            </a>
                         <select name="team1_player[]" class="team1_player">
                             {% for player in team1_roster %}
                                 <option value="{{ player[0] }}"
@@ -44,12 +49,9 @@
                                 data-player-team="{{ player.team_abb }}">{{ player.Player }} ({{ player.Pos }})</option>
                             {% endfor %}
                         </select>
-                        <a href="#" class="info-icon" style="margin-left: 5px;">
-                            <i class="fas fa-info-circle"></i>
-                        </a>
+                        </div>
                         <button type="button" class="remove-team1">Remove Player</button>
                     </div>
-                    <button type="button" id="add-team1">Add Player</button>
                 </div>
             </div>
 
@@ -57,7 +59,12 @@
                 <h3>{{ request.form.team2 }}</h3>
                 <div class="team2-players-container">
                     <label for="team2_player">Player(s) to trade from {{ request.form.team2 }}:</label>
+                    <button type="button" id="add-team2">Add Player</button>
                     <div class="team2_player_container">
+                        <div class="select-icon-container">
+                            <a href="#" class="info-icon" style="margin-left: 5px;">
+                                <i class="fas fa-info-circle"></i>
+                            </a>
                         <select name="team2_player[]" class="team2_player">
                             {% for player in team2_roster %}
                                 <option value="{{ player[0] }}"
@@ -71,12 +78,9 @@
                                 data-player-team="{{ player.team_abb }}">{{ player.Player }} ({{ player.Pos }})</option>
                             {% endfor %}
                         </select>
-                        <a href="#" class="info-icon" style="margin-left: 5px;">
-                            <i class="fas fa-info-circle"></i>
-                        </a>
+                        </div>
                         <button type="button" class="remove-team2">Remove Player</button>
                     </div>
-                    <button type="button" id="add-team2">Add Player</button>
                 </div>
             </div>
             <button id="proposetrade" type="submit">Propose Trade</button>
@@ -102,14 +106,16 @@ $(document).ready(function() {
         event.preventDefault();
         var newDropdown = `
             <div class="team1_player_container">
+                <div class="select-icon-container">
+                    <a href="#" class="info-icon" style="margin-left: 5px;">
+                    <i class="fas fa-info-circle"></i>
+                </a>
                 <select name="team1_player[]" class="team1_player">
                     {% for player in team1_roster %}
                         <option value="{{ player[0] }}" data-player-name="{{ player.Player }}" data-player-pos="{{ player.Pos }}" data-player-headshot="{{ player.img }}" data-player-bye="{{ player.bye }}" data-player-ranking="{{ player.previous_performance }}" data-player-status="{{ player.status }}" data-player-injury="{{ player.injury }}" data-player-team="{{ player.team_abb }}">{{ player.Player }} ({{ player.Pos }})</option>
                     {% endfor %}
                 </select>
-                <a href="#" class="info-icon" style="margin-left: 5px;">
-                    <i class="fas fa-info-circle"></i>
-                </a>
+                </div>
                 <button type="button" class="remove-team1">Remove Player</button>
             </div>
         `;
@@ -125,14 +131,16 @@ $(document).ready(function() {
         event.preventDefault();
         var newDropdown = `
             <div class="team2_player_container">
+                <div class="select-icon-container">
+                <a href="#" class="info-icon" style="margin-left: 5px;">
+                    <i class="fas fa-info-circle"></i>
+                </a>
                 <select name="team2_player[]" class="team2_player">
                     {% for player in team2_roster %}
                         <option value="{{ player[0] }}" data-player-name="{{ player.Player }}" data-player-pos="{{ player.Pos }}" data-player-headshot="{{ player.img }}" data-player-bye="{{ player.bye }}" data-player-ranking="{{ player.previous_performance }}" data-player-status="{{ player.status }}" data-player-injury="{{ player.injury }}" data-player-team="{{ player.team_abb }}">{{ player.Player }} ({{ player.Pos }})</option>
                     {% endfor %}
                 </select>
-                <a href="#" class="info-icon" style="margin-left: 5px;">
-                    <i class="fas fa-info-circle"></i>
-                </a>
+                </div>
                 <button type="button" class="remove-team2">Remove Player</button>
             </div>
         `;

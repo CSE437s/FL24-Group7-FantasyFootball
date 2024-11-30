@@ -251,6 +251,13 @@ def home():
     for league in leagues:
         if isinstance(league.name, bytes):
             league.name = league.name.decode("utf-8")
+    
+    # Set the league name in the session
+    if request.method == "POST":
+        selected_league_id = request.form.get("league_id")
+        selected_league = next((league for league in leagues if league.league_id == selected_league_id), None)
+        if selected_league:
+            session["league_name"] = selected_league.name
 
     # Get connection from the pool
     connection = get_connection()
@@ -857,7 +864,6 @@ def team_analyzer():
 
 @main.route("/trade-builder", methods=["GET", "POST"])
 def trade_builder():
-
     curr_user = g.user_id
 
     connection = get_connection()
@@ -875,7 +881,6 @@ def trade_builder():
     team2_roster = []
     team1_roster_info = []
     team2_roster_info = []
-    trade_feedback = None
 
     if request.method == "POST":
         team1 = request.form.get("team1")
@@ -918,7 +923,6 @@ def trade_builder():
                 }
                 team1_roster_info.append(team1_info)
 
-            # Process team 2 roster
             for player in team2_roster:
                 team2_info = {
                     "Player": player[0],
@@ -935,19 +939,9 @@ def trade_builder():
                 }
                 team2_roster_info.append(team2_info)
 
-            # Now set the rosters for rendering
-            team1_roster = team1_roster_info
-            team2_roster = team2_roster_info
-
-        if request.form.get("your_player") and request.form.get("target_player"):
-            your_player = request.form.get("your_player")
-            target_player = request.form.get("target_player")
-            trade_feedback = f"You proposed trading {your_player} for {target_player}."
-
     return render_template(
         "trade_builder.html",
         teams=teams,
-        team1_roster=team1_roster,
-        team2_roster=team2_roster,
-        trade_feedback=trade_feedback,
+        team1_roster=team1_roster_info,
+        team2_roster=team2_roster_info,
     )
