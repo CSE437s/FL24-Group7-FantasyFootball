@@ -303,7 +303,7 @@ def home():
             team_roster = team_info["roster"]
             for player in team_roster.players:
                 key = player.player_key
-                player_stats = query.get_player_stats_by_week(key, chosen_week=11)
+                player_stats = query.get_player_stats_by_week(key, chosen_week=13)
                 season_totals = query.get_player_stats_for_season(key)
                 # hard coded week for now
                 player_team_data.append(
@@ -424,52 +424,52 @@ def analyze_player(player_data):
 
     # Define grading thresholds based on position
     if position == "QB":
-        if total_points >= 260:
+        if total_points >= 280:
             return "A+"
-        elif total_points >= 240:
+        elif total_points >= 260:
             return "A"
-        elif total_points >= 220:
+        elif total_points >= 240:
             return "A-"
-        elif total_points >= 200:
+        elif total_points >= 220:
             return "B+"
-        elif total_points >= 180:
+        elif total_points >= 200:
             return "B"
-        elif total_points >= 160:
+        elif total_points >= 180:
             return "B-"
-        elif total_points >= 140:
+        elif total_points >= 160:
             return "C+"
-        elif total_points >= 120:
+        elif total_points >= 140:
             return "C"
-        elif total_points >= 100:
+        elif total_points >= 120:
             return "C-"
-        elif total_points >= 80:
+        elif total_points >= 100:
             return "D+"
-        elif total_points >= 60:
+        elif total_points >= 80:
             return "D"
-        elif total_points >= 40:
+        elif total_points >= 60:
             return "D-"
         else:
             return "F"
     elif position in ["RB", "WR"]:
-        if total_points >= 210:
+        if total_points >= 230:
             return "A+"
-        elif total_points >= 190:
+        elif total_points >= 210:
             return "A"
-        elif total_points >= 170:
+        elif total_points >= 190:
             return "A-"
-        elif total_points >= 150:
+        elif total_points >= 170:
             return "B+"
-        elif total_points >= 130:
+        elif total_points >= 150:
             return "B"
-        elif total_points >= 110:
+        elif total_points >= 130:
             return "B-"
-        elif total_points >= 90:
+        elif total_points >= 110:
             return "C+"
-        elif total_points >= 70:
+        elif total_points >= 90:
             return "C"
-        elif total_points >= 50:
+        elif total_points >= 70:
             return "C-"
-        elif total_points >= 40:
+        elif total_points >= 50:
             return "D+"
         elif total_points >= 30:
             return "D"
@@ -478,84 +478,80 @@ def analyze_player(player_data):
         else:
             return "F"
     elif position == "TE":
-        if total_points >= 118:
+        if total_points >= 130:
             return "A+"
-        elif total_points >= 100:
+        elif total_points >= 110:
             return "A"
         elif total_points >= 90:
             return "A-"
-        elif total_points >= 80:
-            return "B+"
         elif total_points >= 70:
-            return "B"
-        elif total_points >= 60:
-            return "B-"
+            return "B+"
         elif total_points >= 50:
-            return "C+"
+            return "B"
         elif total_points >= 40:
-            return "C"
+            return "B-"
         elif total_points >= 30:
-            return "C-"
+            return "C+"
         elif total_points >= 20:
-            return "D+"
+            return "C"
         elif total_points >= 10:
-            return "D"
+            return "C-"
         elif total_points >= 5:
+            return "D+"
+        elif total_points >= 2:
+            return "D"
+        elif total_points >= 1:
             return "D-"
         else:
             return "F"
     elif position == "K":
-        if total_points >= 117:
+        if total_points >= 130:
             return "A+"
-        elif total_points >= 100:
+        elif total_points >= 124:
             return "A"
-        elif total_points >= 90:
+        elif total_points >= 118:
             return "A-"
-        elif total_points >= 80:
+        elif total_points >= 112:
             return "B+"
-        elif total_points >= 70:
+        elif total_points >= 106:
             return "B"
-        elif total_points >= 60:
+        elif total_points >= 100:
             return "B-"
-        elif total_points >= 50:
+        elif total_points >= 94:
             return "C+"
-        elif total_points >= 40:
+        elif total_points >= 88:
             return "C"
-        elif total_points >= 30:
+        elif total_points >= 82:
             return "C-"
-        elif total_points >= 20:
+        elif total_points >= 76:
             return "D+"
-        elif total_points >= 10:
+        elif total_points >= 70:
             return "D"
-        elif total_points >= 5:
-            return "D-"
         else:
             return "F"
     elif position == "DEF":
-        if total_points >= 108:
+        if total_points >= 130:
             return "A+"
-        elif total_points >= 90:
+        elif total_points >= 110:
             return "A"
-        elif total_points >= 80:
+        elif total_points >= 90:
             return "A-"
-        elif total_points >= 70:
+        elif total_points >= 80:
             return "B+"
-        elif total_points >= 60:
+        elif total_points >= 70:
             return "B"
-        elif total_points >= 50:
+        elif total_points >= 60:
             return "B-"
-        elif total_points >= 40:
+        elif total_points >= 50:
             return "C+"
-        elif total_points >= 30:
+        elif total_points >= 40:
             return "C"
-        elif total_points >= 20:
+        elif total_points >= 30:
             return "C-"
-        elif total_points >= 15:
+        elif total_points >= 20:
             return "D+"
         elif total_points >= 10:
             return "D"
-        elif total_points >= 5:
-            return "D-"
         else:
             return "F"
     else:
@@ -577,6 +573,8 @@ def topQB(players):
                 max_points = player.get("season_totals", 0)
                 optimal_qb = player.get("Player", "")
 
+    if optimal_qb is None:    
+        return "No valid QB on roster - pick someone up off waiver wire!"
     return optimal_qb
 
 
@@ -635,6 +633,8 @@ def topTE(players):
                 max_points = player.get("season_totals", 0)
                 optimal_te = player.get("Player", "")
 
+    if optimal_te is None:    
+        return "No valid TE on roster - pick someone up off waiver wire!"
     return optimal_te
 
 
@@ -656,6 +656,8 @@ def topFLEX(players, rbs, wrs, te):
             max_points = player.get("season_totals", 0)
             optimal_flex = player.get("Player", "")
 
+    if optimal_flex is None:    
+        return "No valid FLEX on roster - pick someone up off waiver wire!"
     return optimal_flex
 
 
@@ -674,6 +676,8 @@ def topK(players):
                 max_points = player.get("season_totals", 0)
                 optimal_k = player.get("Player", "")
 
+    if optimal_k is None:    
+        return "No valid K on roster - pick someone up off waiver wire!"
     return optimal_k
 
 
@@ -692,6 +696,8 @@ def topDst(players):
                 max_points = player.get("season_totals", 0)
                 optimal_dst = player.get("Player", "")
 
+    if optimal_dst is None:    
+        return "No valid DST on roster - pick someone up off waiver wire!"
     return optimal_dst
 
 

@@ -5,6 +5,19 @@
 {% block content %}
 <div class="container">
     <h1>Trade Builder</h1>
+    <div class="welcome-message">
+        <h4 >Welcome to the Trade Builder!</h4>
+        <p>Use the Trade Builder to easily create and evaluate trades in your Yahoo Fantasy Football league.</p>
+        <h5>How It Works:</h5>
+        <ul>
+            <ul><strong>Select Teams:</strong> Choose the two teams involved in the trade and load their rosters.</ul>
+            <ul><strong>Build the Trade:</strong> Add players from each team to propose a trade.</ul>
+            <ul><strong>Review and Share:</strong> View the proposed trade summary and copy the details to share with your league.</ul>
+        </ul>
+        <br>
+        <p>This tool makes trade negotiations simple and efficient. Start building your trade now!</p>
+    </div>
+
     <form method="POST" id="tradeForm">
         <label for="team1">Select team 1:</label>
         <select name="team1" id="team1">
@@ -23,63 +36,25 @@
         <button type="submit">Get Rosters</button>
     </form>
 
+    <div class="trade-container">
     {% if team1_roster and team2_roster %}
-        <h2>Trade Builder</h2>
-        <form method="POST" id="playerSelectionForm">
-            <div class="team-container">
-                <h3>{{ request.form.team1 }}</h3>
-                <div class="team1-players-container">
-                    <label for="team1_player">Player(s) to trade from {{ request.form.team1 }}:</label>
-                    <button type="button" id="add-team1">Add Player</button>
-                    <div class="team1_player_container">
-                        <div class="select-icon-container">
-                            <a href="#" class="info-icon" style="margin-left: 5px;">
-                                <i class="fas fa-info-circle"></i>
-                            </a>
-                        <select name="team1_player[]" class="team1_player">
-                            {% for player in team1_roster %}
-                                <option value="{{ player[0] }}"
-                                data-player-name="{{ player.Player }}" 
-                                data-player-pos="{{ player.Pos }}"
-                                data-player-headshot="{{ player.img }}" 
-                                data-player-bye="{{ player.bye }}" 
-                                data-player-ranking="{{ player.previous_performance }}" 
-                                data-player-status="{{ player.status }}" 
-                                data-player-injury="{{ player.injury }}" 
-                                data-player-team="{{ player.team_abb }}">{{ player.Player }} ({{ player.Pos }})</option>
-                            {% endfor %}
-                        </select>
-                        </div>
-                        <button type="button" class="remove-team1">Remove Player</button>
+        <form method="POST" class="playerSelectionForm" id="playerSelectionForm">
+            <div class="trade-builder-container">
+                <div class="team-container">
+                    <h3>{{ request.form.team1 }}</h3>
+                    <div class="team1-players-container">
+                        <label for="team1_player">Player(s) to trade from {{ request.form.team1 }}:</label>
+                        <button type="button" id="add-team1">Add Player</button>
+                        <!-- Player containers will be appended here -->
                     </div>
                 </div>
-            </div>
 
-            <div class="team-container">
-                <h3>{{ request.form.team2 }}</h3>
-                <div class="team2-players-container">
-                    <label for="team2_player">Player(s) to trade from {{ request.form.team2 }}:</label>
-                    <button type="button" id="add-team2">Add Player</button>
-                    <div class="team2_player_container">
-                        <div class="select-icon-container">
-                            <a href="#" class="info-icon" style="margin-left: 5px;">
-                                <i class="fas fa-info-circle"></i>
-                            </a>
-                        <select name="team2_player[]" class="team2_player">
-                            {% for player in team2_roster %}
-                                <option value="{{ player[0] }}"
-                                data-player-name="{{ player.Player }}" 
-                                data-player-pos="{{ player.Pos }}"
-                                data-player-headshot="{{ player.img }}" 
-                                data-player-bye="{{ player.bye }}" 
-                                data-player-ranking="{{ player.previous_performance }}" 
-                                data-player-status="{{ player.status }}" 
-                                data-player-injury="{{ player.injury }}" 
-                                data-player-team="{{ player.team_abb }}">{{ player.Player }} ({{ player.Pos }})</option>
-                            {% endfor %}
-                        </select>
-                        </div>
-                        <button type="button" class="remove-team2">Remove Player</button>
+                <div class="team-container">
+                    <h3>{{ request.form.team2 }}</h3>
+                    <div class="team2-players-container">
+                        <label for="team2_player">Player(s) to trade from {{ request.form.team2 }}:</label>
+                        <button type="button" id="add-team2">Add Player</button>
+                        <!-- Player containers will be appended here -->
                     </div>
                 </div>
             </div>
@@ -90,7 +65,7 @@
             <h2>Proposed Trade</h2>
             <div id="tradeDetails" class="trade-summary-card"></div>
             <button id="copybutton" type="button">Copy Trade Details</button>
-            <button id="restartbutton" type="button">Restart Trade Builder</button>
+            <!-- <button id="restartbutton" type="button">Restart Trade Builder</button> -->
         </div>
     {% endif %}
 </div>
@@ -108,13 +83,22 @@ $(document).ready(function() {
             <div class="team1_player_container">
                 <div class="select-icon-container">
                     <a href="#" class="info-icon" style="margin-left: 5px;">
-                    <i class="fas fa-info-circle"></i>
-                </a>
-                <select name="team1_player[]" class="team1_player">
-                    {% for player in team1_roster %}
-                        <option value="{{ player[0] }}" data-player-name="{{ player.Player }}" data-player-pos="{{ player.Pos }}" data-player-headshot="{{ player.img }}" data-player-bye="{{ player.bye }}" data-player-ranking="{{ player.previous_performance }}" data-player-status="{{ player.status }}" data-player-injury="{{ player.injury }}" data-player-team="{{ player.team_abb }}">{{ player.Player }} ({{ player.Pos }})</option>
-                    {% endfor %}
-                </select>
+                        <i class="fas fa-info-circle"></i>
+                    </a>
+                    <select name="team1_player[]" class="team1_player">
+                        {% for player in team1_roster %}
+                            <option value="{{ player[0] }}" 
+                            data-player-name="{{ player.Player }}" 
+                            data-player-pos="{{ player.Pos }}" 
+                            data-player-headshot="{{ player.img }}" 
+                            data-player-bye="{{ player.bye }}" 
+                            data-player-ranking="{{ player.previous_performance }}" 
+                            data-player-status="{{ player.status }}" 
+                            data-player-injury="{{ player.injury }}" 
+                            data-player-team="{{ player.team_abb }}">
+                            {{ player.Player }} ({{ player.Pos }})</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <button type="button" class="remove-team1">Remove Player</button>
             </div>
@@ -132,14 +116,14 @@ $(document).ready(function() {
         var newDropdown = `
             <div class="team2_player_container">
                 <div class="select-icon-container">
-                <a href="#" class="info-icon" style="margin-left: 5px;">
-                    <i class="fas fa-info-circle"></i>
-                </a>
-                <select name="team2_player[]" class="team2_player">
-                    {% for player in team2_roster %}
-                        <option value="{{ player[0] }}" data-player-name="{{ player.Player }}" data-player-pos="{{ player.Pos }}" data-player-headshot="{{ player.img }}" data-player-bye="{{ player.bye }}" data-player-ranking="{{ player.previous_performance }}" data-player-status="{{ player.status }}" data-player-injury="{{ player.injury }}" data-player-team="{{ player.team_abb }}">{{ player.Player }} ({{ player.Pos }})</option>
-                    {% endfor %}
-                </select>
+                    <a href="#" class="info-icon" style="margin-left: 5px;">
+                        <i class="fas fa-info-circle"></i>
+                    </a>
+                    <select name="team2_player[]" class="team2_player">
+                        {% for player in team2_roster %}
+                            <option value="{{ player[0] }}" data-player-name="{{ player.Player }}" data-player-pos="{{ player.Pos }}" data-player-headshot="{{ player.img }}" data-player-bye="{{ player.bye }}" data-player-ranking="{{ player.previous_performance }}" data-player-status="{{ player.status }}" data-player-injury="{{ player.injury }}" data-player-team="{{ player.team_abb }}">{{ player.Player }} ({{ player.Pos }})</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <button type="button" class="remove-team2">Remove Player</button>
             </div>
@@ -186,7 +170,7 @@ $(document).ready(function() {
         $('#tradeDetails').empty();
         $('#playerSelectionForm').hide();
         $('#tradeForm')[0].reset();
-        $('#section3').hide();
+        $('#tradeForm').show(); // Show the team selection form
     });
 
     $('#copybutton').click(function() {
@@ -199,18 +183,22 @@ $(document).ready(function() {
     });
 
     // Handle info icon click
-    $('.info-icon').on('click', function(event) {
-        event.preventDefault();  // Prevent default link behavior
+    $(document).on('click', '.info-icon', function(event) {
+        event.preventDefault(); // Prevent default link behavior
 
-        // Retrieve data attributes
-        const playerName = $(this).data('player-name') || 'Unknown Player';
-        const playerPos = $(this).data('player-pos') || 'Position Unknown';
-        const playerHeadshot = $(this).data('player-headshot') || 'path_to_headshot.jpg';
-        const playerTeam = $(this).data('player-team') || 'Team Unknown';
-        const playerBye = $(this).data('player-bye') || 'N/A';
-        const playerRanking = $(this).data('player-ranking') || 'N/A';
-        const playerStatus = $(this).data('player-status') || 'None';
-        const playerInjury = $(this).data('player-injury') || 'None';
+        // Find the associated <select> element
+        const selectElement = $(this).siblings('select');
+        const selectedOption = selectElement.find('option:selected');
+
+        // Retrieve data attributes from the selected option
+        const playerName = selectedOption.data('player-name') || 'Unknown Player';
+        const playerPos = selectedOption.data('player-pos') || 'Position Unknown';
+        const playerHeadshot = selectedOption.data('player-headshot') || 'path_to_headshot.jpg';
+        const playerTeam = selectedOption.data('player-team') || 'Team Unknown';
+        const playerBye = selectedOption.data('player-bye') || 'N/A';
+        const playerRanking = selectedOption.data('player-ranking') || 'N/A';
+        const playerStatus = selectedOption.data('player-status') || 'None';
+        const playerInjury = selectedOption.data('player-injury') || 'None';
 
         // Populate the dashboard with player data
         document.getElementById("dashboardPlayerName").innerText = playerName;
@@ -227,7 +215,8 @@ $(document).ready(function() {
 
         // Display the modal
         $('#playerDashboard').show();
-    });
+});
+
 
     // Close the dashboard when the close icon is clicked
     $('#closeDashboard').on('click', function() {
@@ -240,6 +229,7 @@ $(document).ready(function() {
             $('#playerDashboard').hide();
         }
     });
+
 });
 </script>
 

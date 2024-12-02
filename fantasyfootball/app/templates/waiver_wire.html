@@ -6,10 +6,18 @@
 <div class="container">
     <h1>League Players</h1>
 
-    <p class="page-description">
-       Navigate the table in order to learn more about the players in your league!
-    </p>
-
+    <div class="welcome-message">
+        <h4>Welcome to the League Players Page!</h4>
+        <p>Explore detailed insights and data on players in your league to make informed decisions for trades, lineups, and strategy.</p>
+        <h5>How It Works:</h5>
+        <ul>
+            <ul><strong>View League Players:</strong> Browse players in your league with detailed performance data.</ul>
+            <ul><strong>Analyze Player Stats:</strong> Use filters to pinpoint key players by position and recent performance.</ul>
+            <ul><strong>Identify Trade Opportunities:</strong> Discover potential targets to strengthen your roster.</ul>
+        </ul>
+        <br>
+        <p>Leverage these insights to outsmart your competition and dominate your league. Start exploring now!</p>
+    </div>
     <section class="waiver-wire">
         <h4>Filter by Position</h4>
 
@@ -100,8 +108,21 @@
         // Radio button change for position filtering
         $('input[name="positionFilter"]').on('change', function() {
             const selectedPosition = $(this).val();
-            window.location.href = "{{ url_for('main.waiver_wire') }}" + "?positionFilter=" + selectedPosition;
+            $.ajax({
+                url: "{{ url_for('main.waiver_wire') }}",
+                type: "GET",
+                data: { positionFilter: selectedPosition },
+                success: function(response) {
+                    const newDoc = document.open("text/html", "replace");
+                    newDoc.write(response);
+                    newDoc.close();
+                },
+                error: function(xhr) {
+                    console.error("Error fetching data:", xhr);
+                }
+            });
         });
+
 
         $('.dataTables_filter').appendTo('.search-bar');
 
