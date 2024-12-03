@@ -5,9 +5,19 @@
 {% block content %}
 <div class="container">
     <h1>Team Analyzer</h1>
-    <p class="page-description">
-        {% block description %}Use this page to evaluate the strengths and weaknesses of your fantasy team{% endblock %}
-    </p>
+    <div class="welcome-message">
+        <h4>Welcome to the Team Analyzer!</h4>
+<p>Use the Team Analyzer to assess your team's strengths and weaknesses and uncover opportunities to improve your roster.</p>
+<h5>How It Works:</h5>
+<ul>
+    <ul><strong>Analyze Your Team:</strong> Select your team and view detailed player insights, including grades and performance data.</ul>
+    <ul><strong>Identify Strengths & Weaknesses:</strong> Highlight your strongest positions and areas for improvement to help you make informed roster decisions.</ul>
+    <ul><strong>Optimize Your Lineup:</strong> Generate the optimal lineup for the upcoming week to maximize your team's potential.</ul>
+</ul>
+<br>
+<p>This tool is designed to help you dominate your league with smarter strategies and decisions. Start analyzing your team now!</p>
+
+    </div>
     <form method="POST">
         <label for="team">Select a team:</label>
         <select name="team" id="team">
@@ -72,7 +82,7 @@
     <button id="findOptimalLineup" class="btn btn-primary">Find Optimal Lineup</button>
     <div id="optimalLineupContainer" style="display: none;">
         <button id="closeOptimalLineup" class="btn btn-danger">Close</button>
-        <h2>Optimal Lineup for Week 11</h2>
+        <h2>Optimal Lineup for Week 14</h2>
         <ul style="list-style-type: none; padding: 0;">
             <ul style="font-size: 1.2em; margin: 10px 0;"><strong>QB:</strong> {{ ideal_lineup.QB }}</ul>
             <ul style="font-size: 1.2em; margin: 10px 0;"><strong>RB:</strong> {{ ideal_lineup.RB1 }}</ul>

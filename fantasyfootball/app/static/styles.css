@@ -1184,3 +1184,105 @@ gap: 30px;
     border-radius: 4px;
     width: 200px; /* Adjust the width as needed */
 }
+
+/* Trade Container */
+.trade-container {
+    max-width: 1100px; /* Adjust this value if needed */
+    width: 80%; /* Ensure the container takes up 80% of the width */
+    padding: 20px;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    margin: 0 auto; /* Center the container horizontally */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center the content horizontally */
+    justify-content: center; /* Center the content vertically */
+}
+
+/* Trade Builder Container */
+.trade-builder-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px; /* Adjust the gap as needed */
+    width: 100%; /* Ensure the container takes up the full width */
+}
+
+/* Team Container */
+.team-container {
+    flex: 1;
+    /* Ensure equal width for both team containers */
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    width: 425px;
+}
+
+/* Select and Icon Container */
+.select-icon-container {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Adjust the gap as needed */
+}
+
+.select-icon-container select {
+    flex: 1; /* Allow the select element to take up available space */
+}
+
+.select-icon-container .info-icon {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+
+.playerSelectionForm {
+    max-width: 80% !important;
+}
+
+/* Welcome Message Styling */
+.welcome-message {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: left; /* Align text to the left */
+}
+
+.welcome-message h4 {
+    margin-bottom: 10px;
+    color: #5A1EAB; /* Primary color */
+    font-size: 1.5em; /* Increase font size */
+    text-align: center;
+}
+
+.welcome-message h5 {
+    margin-top: 15px;
+    color: #333; /* Darker color for contrast */
+    font-size: 1.2em; /* Increase font size */
+    text-align: center;
+}
+
+.welcome-message ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    margin-top: 10px; /* Add margin to the top */
+    text-align: center;
+}
+
+.welcome-message ul li {
+    margin-bottom: 10px;
+    line-height: 1.5; /* Increase line height for readability */
+    text-align: center;
+}
+
+.welcome-message p {
+    margin-top: 10px;
+    line-height: 1.5; /* Increase line height for readability */
+    color: #555; /* Muted color for text */
+    text-align: center;
+}
