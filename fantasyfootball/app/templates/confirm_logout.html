@@ -7,7 +7,9 @@
     <form method="POST" action="{{ url_for('main.logout') }}" class="confirm-logout-form">
         <button type="submit" class="btn-yes">Yes</button>
         <button type="button" class="btn-no"><a href="{{ url_for('main.home') }}">No</a></button>
-        </form>
+    </form>
+    <!-- "IF YOU WANT TO RETURN TO OUR PAGE, COPY" <a>THIS HYPERLINK</a> TO url_for(main.index) -->
+    <p>If you want to return to our page, paste <a href="{{ url_for('main.index') }}">this hyperlink</a> to the address bar.</p>
 </div>
 
 {% endblock %}

@@ -109,7 +109,7 @@
         $('input[name="positionFilter"]').on('change', function() {
             const selectedPosition = $(this).val();
             $.ajax({
-                url: "{{ url_for('main.waiver_wire') }}",
+                url: "{{ url_for('main.league_players') }}",
                 type: "GET",
                 data: { positionFilter: selectedPosition },
                 success: function(response) {

@@ -305,7 +305,6 @@ def home():
                 key = player.player_key
                 player_stats = query.get_player_stats_by_week(key, chosen_week=13)
                 season_totals = query.get_player_stats_for_season(key)
-                # hard coded week for now
                 player_team_data.append(
                     {
                         "player_name": player.name.full,
@@ -367,7 +366,7 @@ def league_players():
                 'SELECT "player_name", "primary_position", "image", "previous_performance", "bye", "status", "injury", "previous_week", "total_points", "team_abb", "season_totals" FROM "player_data" '
                 'WHERE "primary_position" = %s AND "league" = %s',
                 (position_filter,
-                session["league_name"]),
+                session["league_name"],),
             )
         else:
             cursor.execute(

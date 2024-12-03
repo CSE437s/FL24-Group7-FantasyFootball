@@ -7,13 +7,14 @@
 <div class="container">
     <h1>Select a League</h1>
     <p class="page-description">
-        {% block description %}Welcome to Yahoo Fantasy Football MVP! To get started, make sure you are logged in to your Yahoo account and select a league to start learning some new insights!{% endblock %}
+        {% block description %}Welcome to Yahoo Fantasy Football MVP! To get started, make sure you are logged in to
+        your Yahoo account and select a league to start learning some new insights!{% endblock %}
     </p>
     <form method="POST" id="leagueForm">
         <label for="league_id">Choose a league:</label>
         <select name="league_id" id="league_id">
             {% for league in leagues %}
-                <option value="{{ league.league_id }}">{{ league.name }}</option>
+            <option value="{{ league.league_id }}">{{ league.name }}</option>
             {% endfor %}
         </select>
         <button type="submit">Select League</button>
@@ -29,25 +30,11 @@
     <h2>Connected!</h2>
     {% endif %}
 
-    <!-- More Content -->
-    <!-- Teams -->
-    <h2>All NFL Teams</h2>
-    <div class="grid-container">
-        <!-- Flask dynamically renders these cells -->
-        {% for team in teams_data %}
-        <a href="{{ team.espn_link }}" target="_blank" class="team-cell">
-            <img src="{{ team.logo_url }}" alt="{{ team.name }}" class="team-image">
-            <div class="team-name">{{ team.name }}</div>
-        </a>
-        {% endfor %}
-    </div>
-    <!-- Football API -->
-
 </div>
 
 <!-- Add the JavaScript to show the loader and loading message when the form is submitted -->
 <script>
-    document.getElementById('leagueForm').addEventListener('submit', function() {
+    document.getElementById('leagueForm').addEventListener('submit', function () {
         document.getElementById('loadingMessage').style.display = 'block';
         document.getElementById('loader').style.display = 'block';
     });
