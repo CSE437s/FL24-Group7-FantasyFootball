@@ -47,7 +47,9 @@ api = Blueprint("api", __name__)
 main = Blueprint("main", __name__)
 
 # Endpoint for fethcing from `Football News API`
-FOOTBALL_NEWS_API_URL= "https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams"
+FOOTBALL_NEWS_API_URL = (
+    "https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams"
+)
 
 
 def extract_serializable_data(obj):
@@ -71,23 +73,21 @@ def extract_serializable_data(obj):
     else:
         return str(obj)  # Convert to string as a last resort
 
+
 @main.route("/")
 def index():
-    return render_template(
-        "index.html"
-    )
+    return render_template("index.html")
+
 
 @main.route("/terms_of_service")
 def terms_of_service():
-    return render_template(
-    "terms_of_service.html"
-    )
+    return render_template("terms_of_service.html")
+
 
 @main.route("/about_us")
 def about_us():
-    return render_template(
-    "about_us.html"
-    )
+    return render_template("about_us.html")
+
 
 @main.route("/register", methods=["GET", "POST"])
 def register():
@@ -121,6 +121,7 @@ def register():
 
 
 from flask import flash
+
 
 @main.route("/login", methods=["GET", "POST"])
 def login():
@@ -251,21 +252,21 @@ def home():
     for league in leagues:
         if isinstance(league.name, bytes):
             league.name = league.name.decode("utf-8")
-    
+
     # Set the league name in the session
     if request.method == "POST":
         selected_league_id = request.form.get("league_id")
-        selected_league = next((league for league in leagues if league.league_id == selected_league_id), None)
+        selected_league = next(
+            (league for league in leagues if league.league_id == selected_league_id),
+            None,
+        )
         if selected_league:
             session["league_name"] = selected_league.name
 
     # Get connection from the pool
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute(
-                'SELECT "id", "name", "logo_url", "espn_link" '
-                'FROM "nfl_teams"'
-    )
+    cursor.execute('SELECT "id", "name", "logo_url", "espn_link" ' 'FROM "nfl_teams"')
 
     rows = cursor.fetchall()
 
@@ -277,13 +278,12 @@ def home():
             "logo_url": row[2],
             "espn_link": row[3],
         }
-    for row in rows
+        for row in rows
     ]
 
-        # Close cursor and release connection
+    # Close cursor and release connection
     cursor.close()
     release_connection(connection)
-
 
     if request.method == "POST":
         selected_league_id = request.form.get("league_id")
@@ -327,6 +327,7 @@ def home():
                             if player_stats.player_stats.stats[0].value != 0
                             else 0
                         ),
+                        "fantasy_league": session["league_name"],
                     }
                 )
 
@@ -334,7 +335,7 @@ def home():
                     "season_totals"
                 ] = season_totals.player_points.total
 
-        upsert_player_data(player_team_data)
+        upsert_player_data(player_team_data, league=session.get("league_name"))
 
         # Pass team name and players to the template
         return render_template(
@@ -350,8 +351,8 @@ def home():
     )
 
 
-@main.route("/waiver-wire")
-def waiver_wire():
+@main.route("/league_players")
+def league_players():
     try:
         # Get the position filter from query parameters
         position_filter = request.args.get("positionFilter", "", type=str)
@@ -364,13 +365,15 @@ def waiver_wire():
         if position_filter:
             cursor.execute(
                 'SELECT "player_name", "primary_position", "image", "previous_performance", "bye", "status", "injury", "previous_week", "total_points", "team_abb", "season_totals" FROM "player_data" '
-                'WHERE "primary_position" = %s',
-                (position_filter,),
+                'WHERE "primary_position" = %s AND "league" = %s',
+                (position_filter,
+                session["league_name"]),
             )
         else:
             cursor.execute(
                 'SELECT "player_name", "primary_position", "image", "previous_performance", "bye", "status", "injury", "previous_week", "total_points", "team_abb", "season_totals" '
-                'FROM "player_data"'
+                'FROM "player_data" WHERE "league" = %s',
+                (session["league_name"],),
             )
 
         rows = cursor.fetchall()
@@ -399,7 +402,7 @@ def waiver_wire():
 
         # Render the waiver_wire template with player data and filter info
         return render_template(
-            "waiver_wire.html",
+            "league_players.html",
             waiver_wire_players=waiver_wire_players,
             position_filter=position_filter,
         )
@@ -750,7 +753,10 @@ def team_analyzer():
     try:
         connection = get_connection()
         cursor = connection.cursor()
-        cursor.execute('SELECT DISTINCT "team_name" FROM "player_data"')
+        cursor.execute(
+            'SELECT DISTINCT "team_name" FROM "player_data" WHERE "league" = %s',
+            (session["league_name"],),
+        )
         all_teams = cursor.fetchall()
         cursor.close()
         release_connection(connection)
@@ -770,8 +776,11 @@ def team_analyzer():
             connection = get_connection()
             cursor = connection.cursor()
             cursor.execute(
-                'SELECT "player_name", "primary_position", "image", "previous_performance", "bye", "status", "injury", "previous_week", "total_points", "team_abb", "season_totals" FROM "player_data" WHERE "team_name" = %s',
-                (selected_team,),
+                'SELECT "player_name", "primary_position", "image", "previous_performance", "bye", "status", "injury", "previous_week", "total_points", "team_abb", "season_totals" FROM "player_data" WHERE "team_name" = %s AND "league" = %s',
+                (
+                    selected_team,
+                    session["league_name"],
+                ),
             )
             team_players = cursor.fetchall()
             cursor.close()
@@ -870,7 +879,10 @@ def trade_builder():
     cursor = connection.cursor()
 
     # Fetch all teams
-    cursor.execute('SELECT DISTINCT "team_name" FROM "player_data"')
+    cursor.execute(
+        'SELECT DISTINCT "team_name" FROM "player_data" WHERE "league" = %s',
+        (session["league_name"],),
+    )
     all_teams = cursor.fetchall()
     cursor.close()
     release_connection(connection)
@@ -938,6 +950,7 @@ def trade_builder():
                     "season_totals": player[10],
                 }
                 team2_roster_info.append(team2_info)
+            print(team1_roster_info)
 
     return render_template(
         "trade_builder.html",

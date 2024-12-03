@@ -408,6 +408,16 @@ def create_player_data_table():
     """Create player_data table if it does not exist."""
     connection = None
     cursor = None
+
+    def constraint_exists(cursor, table_name, constraint_name):
+        query = f"""
+        SELECT 1
+        FROM information_schema.table_constraints
+        WHERE table_name = '{table_name}' AND constraint_name = '{constraint_name}';
+        """
+        cursor.execute(query)
+        return cursor.fetchone() is not None
+    
     try:
         connection = get_connection()
         cursor = connection.cursor()
@@ -423,14 +433,15 @@ def create_player_data_table():
             "image" TEXT,
             "status" VARCHAR(50),
             "injury" TEXT,
-            "player_key" VARCHAR(100) UNIQUE NOT NULL,
+            "player_key" VARCHAR(100) NOT NULL,
             "previous_week" INTEGER,
             "previous_performance" NUMERIC,
             "games_played" INTEGER,
             "total_points" NUMERIC,
             "ppg" NUMERIC,
-            "season_totals" NUMERIC
-        );
+            "season_totals" NUMERIC,
+            "league" VARCHAR(255),
+            UNIQUE ("player_key", "league"));
         '''
 
         cursor.execute(create_table_query)
@@ -442,16 +453,22 @@ def create_player_data_table():
             'ALTER TABLE "player_data" ADD COLUMN IF NOT EXISTS "image" TEXT;',
             'ALTER TABLE "player_data" ADD COLUMN IF NOT EXISTS "status" VARCHAR(50);',
             'ALTER TABLE "player_data" ADD COLUMN IF NOT EXISTS "injury" TEXT;',
-            'ALTER TABLE "player_data" ADD COLUMN IF NOT EXISTS "player_key" VARCHAR(100) UNIQUE NOT NULL;',
+            'ALTER TABLE "player_data" ADD COLUMN IF NOT EXISTS "player_key" VARCHAR(100) NOT NULL;',
             'ALTER TABLE "player_data" ADD COLUMN IF NOT EXISTS "previous_week" INTEGER;',
             'ALTER TABLE "player_data" ADD COLUMN IF NOT EXISTS "previous_performance" NUMERIC;',
             'ALTER TABLE "player_data" ADD COLUMN IF NOT EXISTS "games_played" INTEGER;',
             'ALTER TABLE "player_data" ADD COLUMN IF NOT EXISTS "total_points" NUMERIC;',
             'ALTER TABLE "player_data" ADD COLUMN IF NOT EXISTS "ppg" NUMERIC;',
             'ALTER TABLE "player_data" ADD COLUMN IF NOT EXISTS "season_totals" NUMERIC;'
+            'ALTER TABLE "player_data" ADD COLUMN IF NOT EXISTS "league" VARCHAR(255);'
         ]
         for query in alter_table_queries:
             cursor.execute(query)
+
+        # Add constraint if it doesn't already exist
+        if not constraint_exists(cursor, "player_data", "unique_player_league"):
+            cursor.execute('ALTER TABLE "player_data" ADD CONSTRAINT unique_player_league UNIQUE ("player_key", "league");')
+
         connection.commit()
         print("Table 'player_data' created successfully or already exists.")
     except Exception as error:
@@ -463,30 +480,29 @@ def create_player_data_table():
         if connection:
             connection.close()
 
-def player_exists(cursor, player_name):
-    """Check if the player exists in the database by name."""
+def player_exists(cursor, player_name, league):
+    """Check if the player exists in the database by name and league."""
     cursor.execute(
-        'SELECT COUNT(*) FROM "player_data" WHERE "player_name" = %s', (player_name,)
+        'SELECT COUNT(*) FROM "player_data" WHERE "player_name" = %s AND "league" = %s', (player_name, league)
     )
     return cursor.fetchone()[0] > 0
 
-def insert_player_data(cursor, player):
+def insert_player_data(cursor, player,league):
     """Insert new player data into the database."""
     cursor.execute(
         '''INSERT INTO "player_data" 
         ("player_name", "team_name", "primary_position", "bye", 
          "team_abb", "image", "status", "injury", 
          "player_key", "previous_week", "previous_performance", 
-         "games_played", "total_points", "ppg", "season_totals") 
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)''',
+         "games_played", "total_points", "ppg", "season_totals", "league") 
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)''',
         (player["player_name"], player["team_name"], player["primary_position"], 
          player["bye"], player["team_abb"], player["image"], 
          player["status"], player["injury"], player["player_key"], 
          player["previous_week"], player["previous_performance"], 
-         player["games_played"], player["total_points"], player["ppg"], player["season_totals"])
+         player["games_played"], player["total_points"], player["ppg"], player["season_totals"], league)
     )
-
-def update_player_data(cursor, player):
+def update_player_data(cursor, player,league):
     """Update player information in the database."""
     cursor.execute(
         '''UPDATE "player_data"
@@ -494,16 +510,16 @@ def update_player_data(cursor, player):
             "team_abb" = %s, "image" = %s, "status" = %s, "injury" = %s, 
             "player_key" = %s, "previous_week" = %s, 
             "previous_performance" = %s, "games_played" = %s, 
-            "total_points" = %s, "ppg" = %s, "season_totals" = %s
-        WHERE "player_name" = %s''',
+            "total_points" = %s, "ppg" = %s, "season_totals" = %s, "league" = %s
+        WHERE "player_name" = %s AND "league" = %s''',
         (player["team_name"], player["primary_position"], player["bye"], 
          player["team_abb"], player["image"], player["status"], 
          player["injury"], player["player_key"], player["previous_week"], 
          player["previous_performance"], player["games_played"], 
-         player["total_points"], player["ppg"], player["season_totals"], player["player_name"])
+         player["total_points"], player["ppg"], player["season_totals"], player["league"], player["player_name"], league)
     )
 
-def upsert_player_data(player_team_data):
+def upsert_player_data(player_team_data,league):
     """Upsert player data: update existing or insert new player data."""
     connection = None
     try:
@@ -511,10 +527,10 @@ def upsert_player_data(player_team_data):
         cursor = connection.cursor()
 
         for player in player_team_data:
-            if player_exists(cursor, player["player_name"]):
-                update_player_data(cursor, player)
+            if player_exists(cursor, player["player_name"],league):
+                update_player_data(cursor, player,league)
             else:
-                insert_player_data(cursor, player)
+                insert_player_data(cursor, player,league)
 
         connection.commit()
 

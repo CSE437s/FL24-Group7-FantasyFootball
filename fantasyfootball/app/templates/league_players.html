@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Waiver Wire - Yahoo Fantasy Football MVP{% endblock %}
+{% block title %}League Players - Yahoo Fantasy Football MVP{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -100,7 +100,7 @@
         // Radio button change for position filtering
         $('input[name="positionFilter"]').on('change', function() {
             const selectedPosition = $(this).val();
-            window.location.href = "{{ url_for('main.waiver_wire') }}" + "?positionFilter=" + selectedPosition;
+            window.location.href = "{{ url_for('main.league_players') }}" + "?positionFilter=" + selectedPosition;
         });
 
         $('.dataTables_filter').appendTo('.search-bar');
