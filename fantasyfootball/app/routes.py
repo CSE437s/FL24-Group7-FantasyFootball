@@ -154,8 +154,7 @@ def logout():
             g.pop(key)
 
         # Redirect to Yahoo's logout page
-        return render_template("logout.html")
-        # return redirect(f"https://login.yahoo.com/config/login?logout=1&.direct=1&.done={url_for('index', _external=True)}")
+        return render_template("index.html")
     return render_template("confirm_logout.html")
 
 

@@ -5,10 +5,10 @@
 <p>Logging out...</p>
 <script>
     // Redirect to Yahoo's logout page with a return URL
-    const yahooLogoutUrl = "https://login.yahoo.com/config/login?logout=1&.direct=1&.done={{ url_for('main.home', _external=True) }}";
+    // const yahooLogoutUrl = "https://login.yahoo.com/config/login?logout=1&.direct=1&.done={{ url_for('main.home', _external=True) }}";
     
     // Redirect to Yahoo logout
-    window.location.href = yahooLogoutUrl;
+    // window.location.href = yahooLogoutUrl;
 
     // Check the URL every second to see if it has changed to Yahoo's site
     const checkUrlInterval = setInterval(function() {
